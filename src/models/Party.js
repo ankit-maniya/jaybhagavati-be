@@ -7,6 +7,12 @@ const PartySchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      unique:true,
+    },
+    userId: {
+      type: String,
+      required: true,
+      ref:'User',
     },
     email: {
       type: String,

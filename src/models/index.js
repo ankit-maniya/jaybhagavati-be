@@ -1,6 +1,7 @@
 import User from "./User"
 import Party from "./Party"
 import Loat from "./Loat"
+import Bill from "./Bill"
 import mongoose from "mongoose"
 import { config } from "../../config"
 
@@ -16,5 +17,6 @@ export { connectDB }
 export const model = {
   User,
   Party,
-  Loat
+  Loat,
+  Bill
 }

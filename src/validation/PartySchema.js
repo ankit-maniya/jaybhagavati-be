@@ -96,13 +96,6 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
       if (keys.includes("mobile") && req.mobile != "") {
         if (!checkMobile(req.mobile)) {
           resolve(errorRes("Please Enter Valid Mobile"))
-        } else {
-          const found = await model.Party.findOne({ mobile: req.mobile })
-          if (found && JSON.stringify(found._id) != JSON.stringify(LoginId)) {
-            resolve(
-              errorRes("Mobile is Alredy Register! Use Diffrent Mobile!")
-            )
-          }
         }
       }
     }
@@ -113,11 +106,6 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
     } else {
       if (keys.includes("email") && !isEmail(req.email)) {
         resolve(errorRes("Please Enter Proper Email"))
-      } else if (keys.includes("email") && req.email != "") {
-        const found = await model.Party.findOne({ email: req.email })
-        if (found && JSON.stringify(found._id) != JSON.stringify(LoginId)) {
-          resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
-        }
       }
     }
 

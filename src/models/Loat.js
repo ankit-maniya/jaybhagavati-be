@@ -8,6 +8,11 @@ const LoatSchema = new mongoose.Schema(
       type: ObjectId,
       ref:'Party'
     },
+    userId: {
+      type: String,
+      required: true,
+      ref:'User',
+    },
     loatWeight: {
       type: Number,
       required: true,
