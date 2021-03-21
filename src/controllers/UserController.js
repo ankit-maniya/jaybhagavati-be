@@ -9,20 +9,29 @@ const login = async (req, res, next) => {
   try {
     const bodyData = req.body
     const isValidate = await Userschema.checkLoginInputValidate(bodyData) //validate a key and value
+
     if (isValidate.statuscode != 1) {
       throw { message: isValidate.message }
     }
-    const iUser = await model.User.findOne({
-      //find user with this mobile
-      mobile: bodyData.mobile,
-    })
+
+    let find
+    if(bodyData.mobile) {
+      find = { mobile: bodyData.mobile }
+    } else {
+      find = { email: bodyData.email }
+    }
+
+    const iUser = await model.User.findOne(find)
+
     if (!iUser) throw { message: "Not Valid User" }
     const iMatchPassword = await validatePassword(
       bodyData.password,
       iUser.password
     ) //check password match or not
+
     if (!iMatchPassword) throw { message: "Invalid Password !!" }
     iUser.authToken = await createToken(iUser, "12h") // create authtoken
+
     res.send(successRes(iUser)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response

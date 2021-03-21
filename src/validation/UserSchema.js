@@ -89,7 +89,7 @@ const checkLoginInputValidate = async (req) => {
     const keys = Object.keys(req)
 
     // mobile
-    if ((Array.isArray(keys) && keys.includes("mobile")) || req.mobile == "") {
+    if ((Array.isArray(keys) && keys.includes("mobile")) && req.mobile == "") {
         resolve(errorRes("Please Enter Mobile"))
     } else {
       if (keys.includes("mobile") && !checkMobile(req.mobile)) {
@@ -103,11 +103,6 @@ const checkLoginInputValidate = async (req) => {
     } else {
       if (keys.includes("email") && !isEmail(req.email)) {
         resolve(errorRes("Please Enter Proper Email"))
-      } else if (keys.includes("email") && req.email != "") {
-        const found = await model.User.findOne({ email: req.email })
-        if (found && JSON.stringify(found._id) != JSON.stringify(LoginId)) {
-          resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
-        }
       }
     }
 
