@@ -37,23 +37,21 @@ const checkSignupInputValidate = (req) => {
     }
     // address
     if (
-      (Array.isArray(keys) && !keys.includes("address")) ||
+      (Array.isArray(keys) && keys.includes("address")) ||
       req.address == []
     ) {
       resolve(
         errorRes("Please Enter A Address And It will be Array of Object")
       )
     } else {
-      req.address.map((addr) => {
-
-        const latitude = addr.latitude
-        const longitude = addr.longitude
-        if (
-          (latitude == "" && latitude.length == 0) ||
-          (longitude == "" && longitude.length == 0)
-        )
-          resolve(errorRes("Please Enter a Address"))
-      })
+      if (keys.includes("address") && req.address != []) {
+        req.address.map((addr) => {
+          const latitude = addr.latitude
+          const longitude = addr.longitude
+          if (latitude == "" && longitude == "")
+            resolve(errorRes("Please Enter a Address"))
+          })
+      }
     }
     // password & repassword
     if (
@@ -91,13 +89,32 @@ const checkLoginInputValidate = async (req) => {
     const keys = Object.keys(req)
 
     // mobile
-    if ((Array.isArray(keys) && !keys.includes("mobile")) || req.mobile == "") {
-      resolve(errorRes("Please Enter Mobile"))
+    if ((Array.isArray(keys) && keys.includes("mobile")) || req.mobile == "") {
+        resolve(errorRes("Please Enter Mobile"))
     } else {
-      if (!checkMobile(req.mobile)) {
+      if (keys.includes("mobile") && !checkMobile(req.mobile)) {
         resolve(errorRes("Please Enter Valid Mobile"))
       }
     }
+
+    // optional emailid
+    if (Array.isArray(keys) && keys.includes("email") && req.email == "") {
+      resolve(errorRes("Please Enter Email"))
+    } else {
+      if (keys.includes("email") && !isEmail(req.email)) {
+        resolve(errorRes("Please Enter Proper Email"))
+      } else if (keys.includes("email") && req.email != "") {
+        const found = await model.User.findOne({ email: req.email })
+        if (found && JSON.stringify(found._id) != JSON.stringify(LoginId)) {
+          resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
+        }
+      }
+    }
+
+    if ((Array.isArray(keys) && !keys.includes("mobile") && !keys.includes("email"))) {
+      resolve(errorRes("Please Enter Email Either User Mobile"))
+    }
+
     // password & repassword
     if (
       (Array.isArray(keys) && !keys.includes("password")) ||
@@ -125,12 +142,9 @@ const checkUpdateUserInputValidate = (req, LoginId) => {
         req.address.map((addr) => {
           const latitude = addr.latitude
           const longitude = addr.longitude
-          if (
-            (latitude == "" && latitude.length == 0) ||
-            (longitude == "" && longitude.length == 0)
-          )
+          if (latitude == "" && longitude == "")
             resolve(errorRes("Please Enter a Address"))
-        })
+          })
       }
     }
 

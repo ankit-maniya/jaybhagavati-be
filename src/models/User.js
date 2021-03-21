@@ -16,8 +16,7 @@ const UserSchema = new mongoose.Schema(
           latitude: String,
           longitude: String,
         },
-      ],
-      required: true,
+      ]
     },
     email: {
       type: String,
