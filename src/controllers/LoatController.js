@@ -13,7 +13,7 @@ const getLoat = async (req, res, next) => {
       populate: 'partyId',
     };
 
-    let loat = await model.Loat.paginate({}, options)
+    let loat = await model.Loat.paginate({ userId: _id }, options)
 
     res.send(successRes(loat)) // get success response
   } catch (error) {
@@ -24,7 +24,7 @@ const getLoat = async (req, res, next) => {
 
 const addLoat = async (req, res, next) => {
   try {
-
+    const { _id } = req.user // login user bodyData
     const bodyData = req.body
 
     const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
@@ -33,7 +33,7 @@ const addLoat = async (req, res, next) => {
       throw { message: isValidate.message }
     }
 
-    let loatData = await model.Loat.create(bodyData) // add loat bodyData
+    let loatData = await model.Loat.create({ ...bodyData, userId: _id}) // add loat bodyData
 
     res.send(successRes(loatData)) // get success response
   } catch (error) {
@@ -43,7 +43,7 @@ const addLoat = async (req, res, next) => {
 
 const updateLoat = async (req, res, next) => {
   try {
-    console.log("cLLED000----");
+
     const { _id } = req.user // login user bodyData
     const updateData = req.body
     
@@ -64,7 +64,7 @@ const updateLoat = async (req, res, next) => {
       // update loat bodyData and get latest bodyData
       { _id: updateData.loatId, partyId: updateData.partyId },
       {
-        $set: updateData,
+        $set: { ...updateData, userId: _id},
       },
       { new: true }
     )

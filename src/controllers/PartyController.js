@@ -5,8 +5,8 @@ import Partyschema from "../validation/PartySchema"
 
 const getParty = async (req, res, next) => {
   try {
-    const { _id, profile } = req.user // login user bodyData
-    const filter = { isDelete : false }
+    const { _id } = req.user // login user bodyData
+    const filter = { isDelete : false, userId: _id }
 
     let party = await model.Party.find(filter)
 
@@ -20,6 +20,7 @@ const getParty = async (req, res, next) => {
 const addParty = async (req, res, next) => {
   try {
     await uploadFileToStorage(req, res) // upload file using multer
+    const { _id } = req.user // login user bodyData
 
     const bodyData = req.body
 
@@ -42,7 +43,7 @@ const addParty = async (req, res, next) => {
       bodyData["profile"] = req.files.profile[0].filename
     }
 
-    let partyData = await model.Party.create(bodyData) // add party bodyData
+    let partyData = await model.Party.create({...bodyData, userId: _id}) // add party bodyData
 
     if (req.files && req.files.profile) {
       // move file from TEMP location
@@ -59,7 +60,7 @@ const updateParty = async (req, res, next) => {
   try {
     await uploadFileToStorage(req, res) // upload file using multer as a middle ware
 
-    const { _id, profile } = req.user // login user bodyData
+    const { _id } = req.user // login user bodyData
     const updateData = req.body
     
     if (req.body.cuttingType) {
@@ -72,9 +73,8 @@ const updateParty = async (req, res, next) => {
       updateData,
       _id
     )
-    console.log('partyId', typeof updateData.partyId);
-    const partyData = await model.Party.findOne({ _id: req.body.partyId })
 
+    const partyData = await model.Party.findOne({ _id: req.body.partyId })
 
     if (isValidate.statuscode != 1) {
       if (req.files && req.files.profile && req.files.profile[0].filename) {
@@ -113,7 +113,7 @@ const updateParty = async (req, res, next) => {
         _id: updateData.partyId,
       },
       {
-        $set: updateData,
+        $set: {...updateData, userId: _id},
       },
       { new: true }
     )
