@@ -4,7 +4,7 @@ import { me } from "../functions/auth"
 
 const User = express.Router()
 
-User.get("/", UserController.login)
+User.post("/login", UserController.login)
 User.post("/", UserController.signUp)
 User.patch("/", me, UserController.updateUser)
 

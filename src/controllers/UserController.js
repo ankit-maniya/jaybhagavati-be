@@ -15,13 +15,16 @@ const login = async (req, res, next) => {
     }
 
     let find
-    if(bodyData.mobile) {
-      find = { mobile: bodyData.mobile }
-    } else {
-      find = { email: bodyData.email }
+    let iUser
+    if(bodyData.username) {
+      find = { mobile: bodyData.username }
+      iUser = await model.User.findOne(find)
     }
 
-    const iUser = await model.User.findOne(find)
+    if (!iUser) {
+      find = { email: bodyData.username }
+      iUser = await model.User.findOne(find)
+    }
 
     if (!iUser) throw { message: "Not Valid User" }
     const iMatchPassword = await validatePassword(

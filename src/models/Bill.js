@@ -9,7 +9,7 @@ const BillSchema = new mongoose.Schema(
       ref:'Party'
     },
     userId: {
-      type: String,
+      type: ObjectId,
       required: true,
       ref:'User',
     },

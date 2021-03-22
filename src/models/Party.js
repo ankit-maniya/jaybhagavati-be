@@ -9,8 +9,16 @@ const PartySchema = new mongoose.Schema(
       required: true,
       unique:true,
     },
-    userId: {
+    billingName: {
       type: String,
+      required: true,
+      unique:true,
+    },
+    openingBalance: {
+      type: String,
+    },
+    userId: {
+      type: ObjectId,
       required: true,
       ref:'User',
     },
@@ -22,7 +30,7 @@ const PartySchema = new mongoose.Schema(
       type: [
         {
           // _id:false,
-          cuttype: String,
+          cutType: String,
           price: Number,
         },
       ]

@@ -8,9 +8,7 @@ export const me = async (req, res, next) => {
     if (!req.headers["x-token"]) throw "token is required"
     const user = await verifyAuthTocken(req.headers["x-token"])
     // provide user data to access all route
-    if (user.role == "RESTAURENT") {
-      req.restaurent = user
-    } else {
+    if (user.role) {
       req.user = user
     }
     next()
@@ -35,11 +33,7 @@ export const verifyAuthTocken = async (xtoken) => {
   const token = await jwt.verify(xtoken, config.JWT_SECRET)
   const id = mongoose.Types.ObjectId(token._id)
   let udata = ""
-  if (token && token.role == "RESTAURENT") {
-    udata = await model.Restaurent.findOne({
-      _id: id,
-    })
-  } else {
+  if (token) {
     udata = await model.User.findOne({
       _id: id,
     })

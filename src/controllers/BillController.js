@@ -1,20 +1,74 @@
 import { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
 import LoatSchema from "../validation/LoatSchema"
-
+import mongoose from "mongoose"
+const ObjectId = mongoose.Types.ObjectId;
 const getBill = async (req, res, next) => {
   try {
+    const { partyId } = req.params
     const { _id } = req.user // login user bodyData
     const { page, limit } = req.query
+    if (!partyId) {
+        throw { message: "PartyId is Require" }
+    }
     const options = {
       page: page || 1,
       limit: limit || 10,
       populate: 'partyId',
     };
 
-    let loat = await model.Loat.paginate({ userId: _id }, options)
+    let loats = await model.Loat.aggregate(
+      [
+        {
+                $match:{ $or: [{ userId: _id }, {partyId: ObjectId(partyId)}] }
+        },
+        {
+            $unwind: '$partyId'
+        },
+        {
+            $lookup: {
+                from: "parties",
+                localField: "partyId",
+                foreignField: "_id",
+                as: "parties"
+            },
+        },
+        {
+            $unwind: "$parties"
+        },
+        {
+            $project: {
+                "_id": "$_id",
+                "userId":"$userId",
+                "type":"$cuttingType",
+                "loatWeight":"$loatWeight",
+                "numOfDimonds":"$numOfDimonds",
+                "isDelete":"$isDelete",
+                "isActive":"$isActive",
+                "cuttingType": "$parties.cuttingType",
+            }
+        }
+    ])
 
-    res.send(successRes(loat)) // get success response
+    let foundIndex;
+    if (loats && loats.length > 0) {
+      console.log("called with");
+      for(const loat in loats) {
+        if (loats[loat].cuttingType)
+        console.log(loats[loat].cuttingType);
+          foundIndex = await loats[loat].cuttingType.findIndex((d) => d.cutType === loats[loat].type)
+          
+          if(foundIndex !== -1){
+            if( loats[loat].cuttingType[foundIndex].cutType === "newlessor") {
+              loats[loat].payment = loats[loat].numOfDimonds * loats[loat].cuttingType[foundIndex].price
+            } else {
+              loats[loat].payment = loats[loat].loatWeight * loats[loat].cuttingType[foundIndex].price
+            }
+          }
+        }
+      }
+
+    res.send(successRes(loats)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
   }

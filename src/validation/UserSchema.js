@@ -15,7 +15,7 @@ const checkSignupInputValidate = (req) => {
     } else {
       if (keys.includes("email") && !isEmail(req.email)) {
         resolve(errorRes("Please Enter Proper Email"))
-      } else {
+      } else if (keys.includes("email")) {
         const found = await model.User.findOne({ email: req.email })
         if (found) {
           resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
@@ -88,26 +88,9 @@ const checkLoginInputValidate = async (req) => {
   return new Promise(async (resolve, reject) => {
     const keys = Object.keys(req)
 
-    // mobile
-    if ((Array.isArray(keys) && keys.includes("mobile")) && req.mobile == "") {
-        resolve(errorRes("Please Enter Mobile"))
-    } else {
-      if (keys.includes("mobile") && !checkMobile(req.mobile)) {
-        resolve(errorRes("Please Enter Valid Mobile"))
-      }
-    }
-
-    // optional emailid
-    if (Array.isArray(keys) && keys.includes("email") && req.email == "") {
-      resolve(errorRes("Please Enter Email"))
-    } else {
-      if (keys.includes("email") && !isEmail(req.email)) {
-        resolve(errorRes("Please Enter Proper Email"))
-      }
-    }
-
-    if ((Array.isArray(keys) && !keys.includes("mobile") && !keys.includes("email"))) {
-      resolve(errorRes("Please Enter Email Either User Mobile"))
+    // Username
+    if ((Array.isArray(keys) && !keys.includes("username")) && req.username == "") {
+        resolve(errorRes("Please Enter Username"))
     }
 
     // password & repassword

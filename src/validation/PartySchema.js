@@ -9,13 +9,23 @@ const checkAddPartyInputValidate = (req) => {
     if (Array.isArray(keys) && !keys.includes("name")) {
       resolve(errorRes("Please Enter A Name"))
     }
+    // billing Name
+    if (Array.isArray(keys) && !keys.includes("billingName")) {
+      resolve(errorRes("Please Enter A billingName"))
+    }
+
+    // openingBalance
+    if (Array.isArray(keys) && keys.includes("openingBalance") && req.openingBalance == "") {
+      resolve(errorRes("Please Enter A openingBalance"))
+    }
+
     // emailid
     if ((Array.isArray(keys) && keys.includes("email")) || req.email == "") {
       resolve(errorRes("Please Enter Email"))
     } else {
       if (keys.includes("email") && !isEmail(req.email)) {
         resolve(errorRes("Please Enter Proper Email"))
-      } else {
+      } else if(keys.includes("email")){
         const found = await model.Party.findOne({ email: req.email })
         if (found) {
           resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
@@ -44,12 +54,12 @@ const checkAddPartyInputValidate = (req) => {
         errorRes("Please Enter A Cutting Type And It will be Array of Object")
       )
     } else {
-      req.cuttingType.map((cutType) => {
+      req.cuttingType.map((cuttType) => {
 
-        const cuttype = cutType.cuttype
-        const price = cutType.price
+        const cutType = cuttType.cutType
+        const price = cuttType.price
 
-        if (cuttype == "" || price == "" )
+        if (cutType == "" || price == "" )
           resolve(errorRes("Please Enter a Cutting Type"))
       })
     }
@@ -67,9 +77,24 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
       resolve(errorRes("Please Enter party Id"))
     }
 
+    // billing Name
+    if (Array.isArray(keys) && keys.includes("billingName") && req.billingName == "") {
+      resolve(errorRes("Please Enter A billingName"))
+    }
+
     // name
     if (Array.isArray(keys) && keys.includes("name") && req.name == "") {
       resolve(errorRes("Please Enter A Name"))
+    }
+
+    // openingBalance
+    if (Array.isArray(keys) && keys.includes("openingBalance") && req.openingBalance == "") {
+      resolve(errorRes("Please Enter A openingBalance"))
+    }
+
+     // name
+    if (Array.isArray(keys) && keys.includes("billingName") && req.billingName == "") {
+      resolve(errorRes("Please Enter A billingName"))
     }
 
     // cuttingType
@@ -78,12 +103,12 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
     } else {
       if (keys.includes("cuttingType") && req.cuttingType != []) {
 
-        req.cuttingType.map((cutType) => {
+        req.cuttingType.map((cuttType) => {
 
-          const cuttype = cutType.cuttype
-          const price = cutType.price
+          const cutType = cuttType.cutType
+          const price = cuttType.price
 
-          if (cuttype == "" || price == "" )
+          if (cutType == "" || price == "" )
             resolve(errorRes("Please Enter a Cutting Type"))
         })
       }

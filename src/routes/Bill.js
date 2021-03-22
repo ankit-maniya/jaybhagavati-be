@@ -3,7 +3,7 @@ import { BillController } from "../controllers/BillController"
 
 const Bill = express.Router()
 
-Bill.get("/",BillController.getBill)
+Bill.get("/:partyId",BillController.getBill)
 Bill.post("/",BillController.addBill)
 Bill.patch("/", BillController.updateBill)
 
