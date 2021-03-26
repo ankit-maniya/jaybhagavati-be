@@ -2,6 +2,7 @@ import { config } from "../../config"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import { model } from "../models"
+import { errorRes } from "./helper"
 
 export const me = async (req, res, next) => {
   try {
@@ -13,7 +14,7 @@ export const me = async (req, res, next) => {
     }
     next()
   } catch (error) {
-    res.status(403).send({ error })
+    res.send(errorRes(error.message,2))
   }
 }
 
@@ -30,15 +31,15 @@ export const createToken = async (data, expire) => {
 }
 
 export const verifyAuthTocken = async (xtoken) => {
-  const token = await jwt.verify(xtoken, config.JWT_SECRET)
-  const id = mongoose.Types.ObjectId(token._id)
-  let udata = ""
-  if (token) {
-    udata = await model.User.findOne({
-      _id: id,
-    })
-  }
-  if (!udata) throw "Your Session Expired! Login Now!!"
-  if (udata && udata.isActive == false) throw "Your Account is Locked By Admin"
-  return udata
+    const token = await jwt.verify(xtoken, config.JWT_SECRET)
+    const id = mongoose.Types.ObjectId(token._id)
+    let udata = ""
+    if (token) {
+      udata = await model.User.findOne({
+        _id: id,
+      })
+    }
+    if (!udata) throw "Your Session Expired! Login Now!!"
+    if (udata && udata.isActive == false) throw "Your Account is Locked By Admin"
+    return udata
 }

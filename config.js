@@ -12,6 +12,9 @@ const {
   ADMIN_FILE_STORE_PATH,
   SALT,
   JWT_SECRET,
+  EMAIL_USER,
+  EMAIL_PASSWORD
+
 } = process.env
 
 const ADMIN_USER = {
@@ -42,5 +45,7 @@ export const config = {
   ADMIN_FILE_STORE_PATH,
   SALT,
   JWT_SECRET,
+  EMAIL_USER,
+  EMAIL_PASSWORD,
   ADMIN_USER,
 }

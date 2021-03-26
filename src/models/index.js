@@ -1,5 +1,7 @@
 import User from "./User"
+import UserActivity from "./UserActivity"
 import Party from "./Party"
+import CuttingType from "./CuttingType"
 import Loat from "./Loat"
 import Bill from "./Bill"
 import mongoose from "mongoose"
@@ -17,6 +19,8 @@ export { connectDB }
 export const model = {
   User,
   Party,
+  CuttingType,
   Loat,
-  Bill
+  Bill,
+  UserActivity
 }

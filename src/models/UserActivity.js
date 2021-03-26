@@ -1,29 +1,15 @@
 import mongoose from "mongoose"
-const mongoosePaginate = require('mongoose-paginate-v2')
 
 const ObjectId = mongoose.Schema.Types.ObjectId
-const LoatSchema = new mongoose.Schema(
+const UserActivitySchema = new mongoose.Schema(
   {
-    partyId: {
-      type: ObjectId,
-      ref:'Party'
-    },
     userId: {
       type: ObjectId,
       required: true,
       ref:'User',
     },
-    loatWeight: {
-      type: Number,
-      required: true,
-    },
-    numOfDimonds: {
-      type: Number,
-      required: true,
-    },
-    cuttingType:  { 
+    otp: {
       type: String,
-      required: true
     },
     isActive: {
         type: Boolean,
@@ -34,12 +20,10 @@ const LoatSchema = new mongoose.Schema(
         type: Boolean,
         default: 0,
         enum: [0, 1] //0 = Not Deleted, 1 = Deleted
-    }
+    },
   },
   { timestamps: true }
 )
 
-LoatSchema.plugin(mongoosePaginate)
-
-const Loat = mongoose.model("Loat", LoatSchema)
-export default Loat
+const UserActivity = mongoose.model("UserActivity", UserActivitySchema)
+export default UserActivity

@@ -32,6 +32,10 @@ const PartySchema = new mongoose.Schema(
           // _id:false,
           cutType: String,
           price: Number,
+          multiWithDiamonds: {
+            type:Boolean,
+            default:false
+          },
         },
       ]
     },

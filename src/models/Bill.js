@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-const mongoosePaginate = require('mongoose-paginate-v2');
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 const ObjectId = mongoose.Schema.Types.ObjectId
 const BillSchema = new mongoose.Schema(
@@ -39,7 +39,7 @@ const BillSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-BillSchema.plugin(mongoosePaginate);
+BillSchema.plugin(mongoosePaginate)
 
 const Bill = mongoose.model("Bill", BillSchema)
 export default Bill

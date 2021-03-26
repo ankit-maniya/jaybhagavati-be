@@ -19,8 +19,6 @@ const getParty = async (req, res, next) => {
 
 const addParty = async (req, res, next) => {
   try {
-
-    console.log('req', req.body);
     await uploadFileToStorage(req, res) // upload file using multer
     const { _id } = req.user // login user bodyData
 

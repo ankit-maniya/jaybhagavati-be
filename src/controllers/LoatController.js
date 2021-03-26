@@ -7,13 +7,24 @@ const getLoat = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
     const { page, limit } = req.query
+    const { partyId } = req.params
+    let query = {
+      isDelete: false,
+    }
     const options = {
       page: page || 1,
       limit: limit || 10,
       populate: 'partyId',
-    };
+      sort: {createdAt : -1}
+    }
 
-    let loat = await model.Loat.paginate({ userId: _id }, options)
+    if (partyId) {
+      query['partyId'] = partyId
+    }
+
+    query['userId'] = _id
+
+    let loat = await model.Loat.paginate(query, options)
 
     res.send(successRes(loat)) // get success response
   } catch (error) {
@@ -57,8 +68,6 @@ const updateLoat = async (req, res, next) => {
     if (isValidate.statuscode != 1) {
       throw { message: isValidate.message }
     }
-
-    console.log('updateData', updateData);
 
     const loat = await model.Loat.findByIdAndUpdate(
       // update loat bodyData and get latest bodyData

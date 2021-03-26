@@ -4,6 +4,7 @@ import { model } from "../models"
 import Userschema from "../validation/UserSchema"
 import { createToken } from "../functions/auth"
 import { validatePassword } from "../models/User"
+import forgotPasswordByMail from "../functions/sendMail"
 
 const login = async (req, res, next) => {
   try {
@@ -33,8 +34,8 @@ const login = async (req, res, next) => {
     ) //check password match or not
 
     if (!iMatchPassword) throw { message: "Invalid Password !!" }
-    iUser.authToken = await createToken(iUser, "12h") // create authtoken
-
+    iUser.authToken = await createToken(iUser, "7d") // create authtoken
+    delete iUser.password
     res.send(successRes(iUser)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
@@ -65,7 +66,7 @@ const signUp = async (req, res, next) => {
       // move file from TEMP location
       await helper.moveFile(userData.profile, userData._id, "USER")
     }
-    userData.authToken = await createToken(userData, "12h") // create authtoken
+    userData.authToken = await createToken(userData, "7d") // create authtoken
     res.send(successRes(userData)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
@@ -121,8 +122,41 @@ const updateUser = async (req, res, next) => {
   }
 }
 
+const emailSend = async (req, res, next) => {
+  try {
+    const { emailId } = req.params
+    console.log(emailId)
+    const isValidate = await Userschema.checkEmailInputValidate(emailId) //validate a key and value
+
+    if (isValidate.statuscode != 1) {
+      throw { message: isValidate.message }
+    }
+
+    const user = await model.User.findOne({ email: emailId })
+    const Otp = await helper.getRandomNumber()
+
+    const insertData = {
+      userId:user._id,
+      otp:Otp
+    }
+    await model.UserActivity.create(insertData)
+
+    let emailSend
+    if(Otp) {
+      emailSend = await forgotPasswordByMail(emailId, Otp)
+    }
+
+    if (emailSend) {
+      res.send(successRes(emailSend)) // get success response
+    }
+  } catch (error) {
+    res.send(errorRes(error.message)) // get error response
+  }
+}
+
 export const UserController = {
   login,
   signUp,
   updateUser,
+  emailSend,
 }

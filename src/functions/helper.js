@@ -2,9 +2,9 @@ import fs from "fs"
 import path from "path"
 import { config } from "../../config"
 
-const errorRes = (message) => {
+const errorRes = (message,status = 0) => {
     const iRes = {
-        statuscode: 0,
+        statuscode: status,
         message,
     }
     return iRes
@@ -281,7 +281,7 @@ const removeCategoryFile = (file, role = "CATEGORY", folder = "") => {
 }
 
 const removeItemFile = (file, role = "ITEM", folder = "") => {
-    // We have folder  restaurent id (add & update time)
+    // We have folder restaurent id (add & update time)
     if (folder) {
         const folderId = folder.toString()
         fs.unlink(path.join(config.RESTAURENT_FILE_STORE_PATH, folderId, role, file),
@@ -297,6 +297,12 @@ const removeItemFile = (file, role = "ITEM", folder = "") => {
     }
 }
 
+const getRandomNumber = () => {
+  return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1)
+}
+
 const helper = {
     removeFile,
     moveFile,
@@ -306,6 +312,7 @@ const helper = {
     removeCategoryFile,
     moveItemFile,
     removeItemFile,
+    getRandomNumber
 }
 
 export { errorRes, successRes, successMessage, errorMessage }

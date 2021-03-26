@@ -67,6 +67,8 @@ const checkUpdateLoatInputValidate = (req, LoginId) => {
       resolve(errorRes("Please Enter isActive type!"))
     }
 
+    console.log('req.isDelete',typeof req.isDelete)
+
     // isDelete
     if (
       Array.isArray(keys) &&
