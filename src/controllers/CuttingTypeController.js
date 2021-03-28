@@ -7,7 +7,7 @@ const getCuttingType = async (req, res, next) => {
     const { _id } = req.user // login user bodyData
     const filter = { isDelete : false, userId: _id }
 
-    let CuttingType = await model.CuttingType.find(filter)
+    let CuttingType = await model.CuttingType.findOne(filter)
 
     res.send(successRes(CuttingType)) // get success response
   } catch (error) {
@@ -32,9 +32,9 @@ const addCuttingType = async (req, res, next) => {
       throw { message: isValidate.message }
     }
 
-    let CuttingData = await model.CuttingType.create({...bodyData, userId: _id}) // add CuttingType bodyData
+    let getCuttingData = await model.CuttingType.create({...bodyData, userId: _id}) // add CuttingType bodyData
 
-    res.send(successRes(CuttingData)) // get success response
+    res.send(successRes(getCuttingData)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
   }``
@@ -60,24 +60,43 @@ const updateCuttingType = async (req, res, next) => {
       throw { message: isValidate.message }
     }
     
-    const CuttingData = await model.CuttingType.findOne({ _id: updateData.CuttingTypeId })
+    const getCuttingData = await model.CuttingType.findOne({ _id: updateData.cutTypeId })
 
-    // add cuttingType with push old cuttingType (combine)
+    // add cuttingType with push old cuttingType (combine) updateData
+    let cuttingTypeData = []
     if (updateData["cuttingType"]) {
       updateData["cuttingType"].map((cuttingData) => {
-        if (cuttingData._id) {
-          let getIndex = CuttingData.cuttingType.findIndex((d) => d.id === cuttingData._id)
-          if (getIndex !== undefined && getIndex !== -1) {
-            updateData["cuttingType"][getIndex] = cuttingData
+
+        if (cuttingData._id && cuttingData._id !== "") {
+          let getIndex = getCuttingData.cuttingType.findIndex((d) => d._id.toString() == cuttingData._id)
+
+          if (getIndex !== -1) {
+            getCuttingData.cuttingType[getIndex] = cuttingData
+            cuttingTypeData.push(getCuttingData.cuttingType[getIndex])
+            getCuttingData.cuttingType.splice(getIndex,1);
+          } else {
+            throw { message : `update id ==> ${cuttingData._id} Not Exists` }
           }
+
+        } else {
+          let typeExist = getCuttingData.cuttingType.find((d) => d.cutType === cuttingData.cutType)
+
+          if (!typeExist) {
+            cuttingTypeData.push(cuttingData)
+          } else {
+            throw { message : `${typeExist.cutType} Cutting Type is Already Exists` }
+          }
+
         }
       })
+
+      updateData["cuttingType"] = [...cuttingTypeData,...getCuttingData.cuttingType]
     }
 
     const CuttingType = await model.CuttingType.findByIdAndUpdate(
       // update CuttingType bodyData and get latest bodyData
       {
-        _id: updateData.CuttingTypeId,
+        _id: updateData.cutTypeId,
       },
       {
         $set: {...updateData, userId: _id},

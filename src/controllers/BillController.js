@@ -1,26 +1,21 @@
+import mongoose from "mongoose"
 import { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
-import LoatSchema from "../validation/LoatSchema"
-import mongoose from "mongoose"
 const ObjectId = mongoose.Types.ObjectId
+
 const getBill = async (req, res, next) => {
   try {
     const { partyId } = req.params
     const { _id } = req.user // login user bodyData
-    const { page, limit } = req.query
+
     if (!partyId) {
         throw { message: "PartyId is Require" }
-    }
-    const options = {
-      page: page || 1,
-      limit: limit || 10,
-      populate: 'partyId',
     }
 
     let loats = await model.Loat.aggregate(
       [
         {
-                $match:{ $and: [{ userId: _id }, { partyId: ObjectId(partyId) }, { isDelete: false }] }
+            $match:{ $and: [{ userId: _id }, { partyId: ObjectId(partyId) }, { isDelete: false }] }
         },
         {
             $unwind: '$partyId'
@@ -70,6 +65,7 @@ const getBill = async (req, res, next) => {
     let foundIndex
     if (loats && loats.length > 0) {
       for (const loat in loats) {
+
         if (loats[loat].cuttingType)
           foundIndex = await loats[loat].cuttingType.findIndex((d) => d.cutType === loats[loat].type)
           
@@ -108,12 +104,6 @@ const addBill = async (req, res, next) => {
     const { _id } = req.user // login user bodyData
     const bodyData = req.body
 
-    const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
-
-    if (isValidate.statuscode != 1) {
-      throw { message: isValidate.message }
-    }
-
     let loatData = await model.Bill.create({ ...bodyData, userId: _id }) // add loat bodyData
 
     res.send(successRes(loatData)) // get success response
@@ -129,14 +119,6 @@ const updateBill = async (req, res, next) => {
     
     // update edited time
     updateData["updatedAt"] = new Date()
-    const isValidate = await LoatSchema.checkUpdateLoatInputValidate(
-      updateData,
-      _id
-    )
-
-    if (isValidate.statuscode != 1) {
-      throw { message: isValidate.message }
-    }
 
     const loat = await model.Bill.findByIdAndUpdate(
       // update loat bodyData and get latest bodyData

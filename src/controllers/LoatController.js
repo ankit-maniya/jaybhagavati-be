@@ -1,4 +1,4 @@
-import { uploadFileToStorage } from "../functions/uploadfile"
+import moment from "moment"
 import { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
 import LoatSchema from "../validation/LoatSchema"
@@ -36,15 +36,34 @@ const getLoat = async (req, res, next) => {
 const addLoat = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
-    const bodyData = req.body
-
-    const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
-
-    if (isValidate.statuscode != 1) {
-      throw { message: isValidate.message }
+    const {loats} = req.body
+    if(loats && !loats.length){
+      throw { message: 'Invalid Data passed'}
     }
 
-    let loatData = await model.Loat.create({ ...bodyData, userId: _id}) // add loat bodyData
+    const bodyData = JSON.parse(loats).map((data) => {
+      data.userId = _id
+      if (!data.entryDate) {
+        data.entryDate = moment(new Date()).format('YYYY-MM-DD')
+        console.log('data.entryDate',data.entryDate);
+        return data
+      } else {
+        data.entryDate = moment(data.entryDate).format('YYYY-MM-DD')
+        console.log('data.entryDate',data.entryDate);
+
+        return data
+      }
+    })
+
+    // console.log('bodyData', bodyData);
+    
+    // const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
+
+    // if (isValidate.statuscode != 1) {
+    //   throw { message: isValidate.message }
+    // }
+
+    let loatData = await model.Loat.create(bodyData) // add loat bodyData
 
     res.send(successRes(loatData)) // get success response
   } catch (error) {
@@ -84,8 +103,9 @@ const updateLoat = async (req, res, next) => {
   }
 }
 
+
 export const LoatController = {
   getLoat,
   addLoat,
-  updateLoat,
+  updateLoat
 }

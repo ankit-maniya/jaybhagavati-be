@@ -16,6 +16,11 @@ const checkAddLoatInputValidate = (req) => {
       resolve(errorRes("Please Enter A partyId"))
     }
 
+    // loatPrice
+    if (Array.isArray(keys) && !keys.includes("loatPrice")) {
+      resolve(errorRes("Please Enter A loatPrice"))
+    }
+
     // numOfDimonds
     if (Array.isArray(keys) && !keys.includes("numOfDimonds")) {
       resolve(errorRes("Please Enter A numOfDimonds"))
@@ -45,17 +50,22 @@ const checkUpdateLoatInputValidate = (req, LoginId) => {
 
     // loatWeight
     if (Array.isArray(keys) && keys.includes("loatWeight") && req.loatWeight == "") {
-      resolve(errorRes("Please Enter A loatWeight"))
+      resolve(errorRes("Please Enter A loat Weight"))
+    }
+
+    // loatPrice
+    if (Array.isArray(keys) && keys.includes("loatPrice") && req.loatPrice == "") {
+      resolve(errorRes("Please Enter A loat Price"))
     }
 
     // numOfDimonds
     if (Array.isArray(keys) && keys.includes("numOfDimonds") && req.numOfDimonds == "") {
-      resolve(errorRes("Please Enter A numOfDimonds"))
+      resolve(errorRes("Please Enter A number Of Dimonds"))
     }
 
     // cuttingType
     if (Array.isArray(keys) && keys.includes("cuttingType") && req.cuttingType == "") {
-      resolve(errorRes("Please Enter A cuttingType"))
+      resolve(errorRes("Please Enter A cutting Type"))
     }
 
     // isActive
@@ -66,8 +76,6 @@ const checkUpdateLoatInputValidate = (req, LoginId) => {
     ) {
       resolve(errorRes("Please Enter isActive type!"))
     }
-
-    console.log('req.isDelete',typeof req.isDelete)
 
     // isDelete
     if (

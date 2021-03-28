@@ -36,10 +36,6 @@ export const uploadFileToStorage = pify(
       checkfiletype(file, cb)
     },
   }).fields([
-    { name: "profile", maxCount: 1 },
-    { name: "restaurentBanner", maxCount: 1 },
-    { name: "menuBanner", maxCount: 1 },
-    { name: "categoryBanner", maxCount: 1 },
-    { name: "itemBanner", maxCount: 1 },
+    { name: "profile", maxCount: 1 }
   ])
 )

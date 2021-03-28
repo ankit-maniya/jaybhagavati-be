@@ -12,17 +12,19 @@ const CuttingTypeSchema = new mongoose.Schema(
       type: [
         {
           // _id:false,
-          cutType: String,
-          price: Number,
-          multiWithDiamonds: Boolean,
+          cutType: {
+            type:String,
+            default:''
+          },
+          price: {
+            type:Number,
+            default:0
+          },
+          multiWithDiamonds: {
+            type:Boolean,
+            default:false
+          },
         },
-      ],
-      default: [
-        {
-          cutType: '',
-          price: 0,
-          multiWithDiamonds: false
-        }
       ]
     },
     isActive: {

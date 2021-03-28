@@ -14,9 +14,25 @@ const PartySchema = new mongoose.Schema(
       required: true,
       unique:true,
     },
-    openingBalance: {
-      type: String,
-    },
+    balanceSheet: [{
+        _id:false,
+        oldBalance: {
+          type:Number,
+          default:0
+        },
+        deductionAmount: {
+          type:Number,
+          default:0
+        },
+        remainBalance: {
+          type:Number,
+          default:0
+        },
+        alloyAmount: {
+          type:Number,
+          default:0
+        },
+      }],
     userId: {
       type: ObjectId,
       required: true,
@@ -30,8 +46,14 @@ const PartySchema = new mongoose.Schema(
       type: [
         {
           // _id:false,
-          cutType: String,
-          price: Number,
+          cutType: {
+            type:String,
+            default:''
+          },
+          price: {
+            type:Number,
+            default:0
+          },
           multiWithDiamonds: {
             type:Boolean,
             default:false

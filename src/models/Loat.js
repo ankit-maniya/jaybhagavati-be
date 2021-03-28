@@ -17,6 +17,10 @@ const LoatSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    loatPrice: {
+      type: Number,
+      required: true,
+    },
     numOfDimonds: {
       type: Number,
       required: true,
@@ -24,6 +28,10 @@ const LoatSchema = new mongoose.Schema(
     cuttingType:  { 
       type: String,
       required: true
+    },
+    multiWithDiamonds:  { 
+      type: Boolean,
+      default: false
     },
     isActive: {
         type: Boolean,
@@ -34,6 +42,9 @@ const LoatSchema = new mongoose.Schema(
         type: Boolean,
         default: 0,
         enum: [0, 1] //0 = Not Deleted, 1 = Deleted
+    },
+    entryDate:{
+      type: Date,
     }
   },
   { timestamps: true }
