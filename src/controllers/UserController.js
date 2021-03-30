@@ -125,7 +125,6 @@ const updateUser = async (req, res, next) => {
 const emailSend = async (req, res, next) => {
   try {
     const { emailId } = req.params
-    console.log(emailId)
     const isValidate = await Userschema.checkEmailInputValidate(emailId) //validate a key and value
 
     if (isValidate.statuscode != 1) {

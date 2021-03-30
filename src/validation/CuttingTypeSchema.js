@@ -4,23 +4,14 @@ const checkAddCuttingTypeInputValidate = (req) => {
   return new Promise(async (resolve, reject) => {
     const keys = Object.keys(req)
 
-    // cuttingType
-    if (
-      (Array.isArray(keys) && !keys.includes("cuttingType")) ||
-      req.cuttingType == []
-    ) {
-      resolve(
-        errorRes("Please Enter A Cutting Type And It will be Array of Object")
-      )
-    } else {
-      req.cuttingType.map((cuttType) => {
+    // cutType
+    if (Array.isArray(keys) && !keys.includes("cutType") || req.cutType == "") {
+      resolve(errorRes("Please Enter cutType"))
+    }
 
-        const cutType = cuttType.cutType
-        const price = cuttType.price
-
-        if (cutType == "" || price == "" )
-          resolve(errorRes("Please Enter a Cutting Type"))
-      })
+    // price
+    if (Array.isArray(keys) && !keys.includes("price") || req.price == "") {
+      resolve(errorRes("Please Enter price"))
     }
 
     resolve(successMessage("valid data"))
@@ -36,22 +27,16 @@ const checkUpdateCuttingTypeInputValidate = (req, LoginId) => {
       resolve(errorRes("Please Enter cutTypeId  Id"))
     }
 
-    // cuttingType
-    if (Array.isArray(keys) && keys.includes("cuttingType") && req.cuttingType == []) {
-      resolve(errorRes("Please Enter A Cutting Type And It will be Array"))
-    } else {
-      if (keys.includes("cuttingType") && req.cuttingType != []) {
-
-        req.cuttingType.map((cuttType) => {
-
-          const cutType = cuttType.cutType
-          const price = cuttType.price
-
-          if (cutType == "" || price == "" )
-            resolve(errorRes("Please Enter a Cutting Type"))
-        })
-      }
+    // cutType
+    if (Array.isArray(keys) && keys.includes("cutType") || req.cutType == "") {
+      resolve(errorRes("Please Enter cutType"))
     }
+
+    // price
+    if (Array.isArray(keys) && keys.includes("price") || req.price == "") {
+      resolve(errorRes("Please Enter price"))
+    }
+
 
     // isActive
     if (

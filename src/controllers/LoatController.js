@@ -26,8 +26,6 @@ const getLoat = async (req, res, next) => {
 
     let loat = await model.Loat.paginate(query, options)
 
-    console.log('loat', loat);
-
     res.send(successRes(loat)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
@@ -49,6 +47,7 @@ const addLoat = async (req, res, next) => {
 
     for (let i=0; i<totalLength; i++) {
       loats[i].userId = _id
+      
       if (!loats[i].entryDate) {
         loats[i].entryDate = await helper.formatDate(new Date())
         bodyData.push(loats[i])
@@ -91,7 +90,6 @@ const updateLoat = async (req, res, next) => {
     }
 
     if (partyId == '') {
-      console.log('partyId',partyId);
       delete updateData.partyId
     }
 

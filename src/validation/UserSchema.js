@@ -107,7 +107,6 @@ const checkLoginInputValidate = async (req) => {
 
 const checkEmailInputValidate = async (email) => {
   return new Promise(async (resolve, reject) => {
-    console.log('emailId',email)
     // emailid
     if (!email) {
       resolve(errorRes("Please Enter Email"))
@@ -116,7 +115,6 @@ const checkEmailInputValidate = async (email) => {
         resolve(errorRes("Please Enter Proper Email"))
       } else if (email != "") {
         const found = await model.User.findOne({ email:email })
-        console.log(found)
         if (!found) {
           resolve(errorRes("Email is Not Register! Use Diffrent Email!"))
         }
