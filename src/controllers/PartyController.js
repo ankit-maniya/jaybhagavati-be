@@ -1,18 +1,26 @@
-import mongoose, { Mongoose } from "mongoose"
+import mongoose from "mongoose"
 import { uploadFileToStorage } from "../functions/uploadfile"
 import helper, { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
 import Partyschema from "../validation/PartySchema"
-import moment from "moment"
 
 const ObjectId = mongoose.Types.ObjectId
 
 const getParty = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
-    const filter = { isDelete : false, userId: _id }
 
-    let party = await model.Party.find(filter)
+    const query = {
+      isDelete : false,
+      userId: _id,
+      // cuttingType: {
+      //   "$elemMatch": {
+      //     isDelete: false
+      //   }
+      // }
+    }
+
+    let party = await model.Party.find(query).sort({ 'name':1})
 
     res.send(successRes(party)) // get success response
   } catch (error) {
@@ -96,16 +104,53 @@ const updateParty = async (req, res, next) => {
       throw { message: isValidate.message }
     }
 
-    // add cuttingType with push old cuttingType (combine)
+    // // add cuttingType with push old cuttingType (combine)
+    // if (updateData["cuttingType"]) {
+    //   updateData["cuttingType"].map((cuttingData) => {
+    //     if (cuttingData._id) {
+    //       let getIndex = partyData.cuttingType.findIndex((d) => d.id === cuttingData._id)
+    //       if (getIndex !== undefined && getIndex !== -1) {
+    //         updateData["cuttingType"][getIndex] = cuttingData
+    //       }
+    //     }
+    //   })
+    // }
+
+    // add cuttingType with push old cuttingType (combine) updateData
+    let cuttingTypeData = []
     if (updateData["cuttingType"]) {
       updateData["cuttingType"].map((cuttingData) => {
-        if (cuttingData._id) {
-          let getIndex = partyData.cuttingType.findIndex((d) => d.id === cuttingData._id)
-          if (getIndex !== undefined && getIndex !== -1) {
-            updateData["cuttingType"][getIndex] = cuttingData
+
+        const cutID = cuttingData._id || ""
+
+        if (cutID !== "") {
+          let getIndex = partyData.cuttingType.findIndex((d) => d._id.toString() == cutID._id)
+
+          if (getIndex !== -1) {
+            partyData.cuttingType[getIndex] = cuttingData
+            cuttingTypeData.push(partyData.cuttingType[getIndex])
+            partyData.cuttingType.splice(getIndex,1);
+          } else {
+            throw { message : `update id ==> ${cutID._id} Not Exists` }
           }
+
+        } else {
+          let typeExist = partyData.cuttingType.find((d) => d.cutType === cuttingData.cutType)
+
+          if (!typeExist) {
+            if(cutID === ""){
+              delete cuttingData._id
+            }
+            
+            cuttingTypeData.push(cuttingData)
+          } else {
+            throw { message : `${typeExist.cutType} Cutting Type is Already Exists` }
+          }
+
         }
       })
+
+      updateData["cuttingType"] = [...cuttingTypeData,...partyData.cuttingType]
     }
 
     if (req.files && req.files.profile && req.files.profile[0].filename) {
@@ -150,10 +195,14 @@ const getPartyLoatDateWise = async (req, res, next) => {
         $match :{ $and:  [ { partyId: ObjectId(partyId)}, { userId: _id }, { isDelete : false } ] }
       },
       {
+        $unwind: '$cuttingType'
+      },
+      {
           $group : {
               _id : { type: "$cuttingType", date : "$entryDate"},
               loats: {
                   $push: {
+                      type:"$cuttingType",
                       numOfDimonds:"$numOfDimonds",
                       loatWeight:"$loatWeight",
                       loatPrice:"$loatPrice",
@@ -175,18 +224,38 @@ const getPartyLoatDateWise = async (req, res, next) => {
               },
           },
       },
+      { $sort : { "_id" : 1 } }
     ])
 
-    let partyDetail = await model.Party.findOne({ _id: ObjectId(partyId) })
+    let party = await model.Party.findOne({ _id: ObjectId(partyId) })
+
     let allKeys = {
-      TotalPayment: 0,
+      TotalDimonds: 0,
+      TotalWeight: 0,
+      TotalDiamondWiseCount: 0,
+      TotalDiamondWiseWeight: 0,
+      TotalDiamondWiseAmount: 0,
+      TotalWeightWiseCount: 0,
+      TotalWeightWiseWeight: 0,
+      TotalWeightWiseAmount: 0,
+      TotalAmount: 0,
       paymentDetails:[]
     }
     
-    partyDetail = partyDetail.cuttingType || [] 
+    const partyDetail = party.cuttingType || [] 
 
     partyDetail.map((type) => {
-      allKeys.paymentDetails.push({ key: `Total${type.cutType}Diamonds`, value: 0 }, { key: `Total${type.cutType}DiamondsWisePrice`, value: 0 }, { key: `Total${type.cutType}Price`, value: 0 })
+      allKeys.paymentDetails.push(
+        { key: `Total Diamonds (${type.cutType})`, value: 0 },
+        { key: `Total Weight (${type.cutType})`, value: 0 },
+        { key: `Diamond Wise Count (${type.cutType})`, value: 0 },
+        { key: `Diamond Wise Weight (${type.cutType})`, value: 0 },
+        { key: `Diamond Wise Amount (${type.cutType})`, value: 0 },
+        { key: `Weight Wise Diamond (${type.cutType})`, value: 0 },
+        { key: `Weight Wise Weight (${type.cutType})`, value: 0 },
+        { key: `Weight Wise Amount (${type.cutType})`, value: 0 },
+        { key: `Total Amount (${type.cutType})`, value: 0 }
+      )
     })
 
     const totalLoatLength = loats.length
@@ -198,47 +267,78 @@ const getPartyLoatDateWise = async (req, res, next) => {
         if (totalTypeWiseLoatLength > 0) {
           for (let j=0; j<totalTypeWiseLoatLength; j++) {
             
-            let typeWiseTotal = {
-              loatsDimonds: 0,
-              loatsDiamondsWisePrice: 0,
-              loatsPrices:0
-            }
+            // let typeWiseTotal = {
+            //   loatsDimonds: 0,
+            //   loatsDiamondsWisePrice: 0,
+            //   loatsPrices:0,
+            //   loatsCaret:0
+            // }
 
-            const index1 = allKeys.paymentDetails.findIndex((d) => d.key === `Total${tLoat[j]._id.type}Diamonds`)
-            const index2 = allKeys.paymentDetails.findIndex((d) => d.key === `Total${tLoat[j]._id.type}DiamondsWisePrice`)
-            const index3 = allKeys.paymentDetails.findIndex((d) => d.key === `Total${tLoat[j]._id.type}Price`)
+            const index1 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Diamonds (${tLoat[j]._id.type})`)
+            const index2 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Weight (${tLoat[j]._id.type})`)
+            const index3 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Count (${tLoat[j]._id.type})`)
+            const index4 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Weight (${tLoat[j]._id.type})`)
+            const index5 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Amount (${tLoat[j]._id.type})`)
+            const index6 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Diamond (${tLoat[j]._id.type})`)
+            const index7 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Weight (${tLoat[j]._id.type})`)
+            const index8 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Amount (${tLoat[j]._id.type})`)
+            const index9 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Amount (${tLoat[j]._id.type})`)
             const loatsLength = tLoat[j].loats.length
             const allLoats = tLoat[j].loats
-            if ((index1 !== -1 || index2 !== -1 || index3 !== -1) && loatsLength > 0) {
+            if ((index3 !== -1 || index6 !== -1) && loatsLength > 0) {
 
               for (let k=0; k<loatsLength; k++) {
                 if (allLoats[k].multiWithDiamonds) {
-                  if (index1 !== -1 && index2 !== -1) {
-
+                  if (index3 !== -1) {
                     allKeys.paymentDetails[index1].value += allLoats[k].numOfDimonds
-                    typeWiseTotal.loatsDimonds += allLoats[k].numOfDimonds
-                    allKeys.paymentDetails[index2].value += allLoats[k].price
-                    typeWiseTotal.loatsDiamondsWisePrice += allLoats[k].price
-                    allKeys.TotalPayment += allLoats[k].price
+                    allKeys.paymentDetails[index2].value += allLoats[k].loatWeight
+                    allKeys.paymentDetails[index9].value += allLoats[k].price
+
+                    allKeys.paymentDetails[index3].value += allLoats[k].numOfDimonds
+                    allKeys.paymentDetails[index4].value += allLoats[k].loatWeight
+                    allKeys.paymentDetails[index5].value += allLoats[k].price
+                    // typeWiseTotal.loatsDimonds += allLoats[k].numOfDimonds
+                    // typeWiseTotal.loatsDiamondsWisePrice += allLoats[k].price
+                    // typeWiseTotal.loatsCaret += allLoats[k].loatWeight
+
+                    allKeys.TotalDimonds += allLoats[k].numOfDimonds
+                    allKeys.TotalWeight += allLoats[k].loatWeight
+                    allKeys.TotalDiamondWiseCount += allLoats[k].numOfDimonds
+                    allKeys.TotalDiamondWiseWeight += allLoats[k].loatWeight
+                    allKeys.TotalDiamondWiseAmount += allLoats[k].price
+                    allKeys.TotalAmount += allLoats[k].price
                   }
                 } else {
-                  if (index3 !== -1) {
+                  if (index6 !== -1) {
 
-                    allKeys.paymentDetails[index3].value += allLoats[k].price
-                    typeWiseTotal.loatsPrices += allLoats[k].price
-                    allKeys.TotalPayment += allLoats[k].price
+                    allKeys.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                    allKeys.paymentDetails[index2].value += allLoats[k].loatWeight
+                    allKeys.paymentDetails[index9].value += allLoats[k].price
+
+                    allKeys.paymentDetails[index6].value += allLoats[k].numOfDimonds
+                    allKeys.paymentDetails[index7].value += allLoats[k].loatWeight
+                    allKeys.paymentDetails[index8].value += allLoats[k].price
+                    // typeWiseTotal.loatsPrices += allLoats[k].price
+                    // typeWiseTotal.loatsCaret += allLoats[k].loatWeight
+
+                    allKeys.TotalDimonds += allLoats[k].numOfDimonds
+                    allKeys.TotalWeight += allLoats[k].loatWeight
+                    allKeys.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                    allKeys.TotalWeightWiseWeight += allLoats[k].loatWeight
+                    allKeys.TotalWeightWiseAmount += allLoats[k].price
+                    allKeys.TotalAmount += allLoats[k].price
                   }
                 }
               }
 
-              loats[i].typeWiseLoat[j].typeWiseTotal = typeWiseTotal
+             // loats[i].typeWiseLoat[j].typeWiseTotal = typeWiseTotal
             }
           }
         }
       }
     }
 
-    const payment = { loats, allKeys}
+    const payment = { party, loats, allKeys}
 
     res.send(successRes(payment)) // get success response
   } catch (error) {
@@ -253,12 +353,14 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
     const { date } = req.body
     if (!date) {
         throw { message: "Date is Required!" }
-    }  
-    const findDate = new Date(`${date}T05:30:00.000+05:30`)
+    } 
+
+    // const findDate = new Date(`${moment(date).format("YYYY-MM-DD")}T05:30:00.000+05:30`)
+    const findDate = await helper.formatDate(date)
 
     let loats = await model.Loat.aggregate([
         {
-            $match :{ $and:  [{ userId: _id }, { entryDate: findDate }, {"isDelete" : false} ] }
+            $match :{ $and:  [{ userId: _id }, { entryDate: findDate }, { isDelete : false } ] }
         },
         { 
             $lookup: {
@@ -273,14 +375,26 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
                 _id :{ dateString: "$entryDate" },
                 loats: {
                     $push: {
+                        loatId:"$_id",
+                        entryDate:"$entryDate",
+                        cuttingType:"$cuttingType",
                         numOfDimonds:"$numOfDimonds",
                         loatWeight:"$loatWeight",
                         loatPrice:"$loatPrice",
                         multiWithDiamonds:"$multiWithDiamonds",
-                        price:{
-                            $cond: { if: { "$eq": [ "$multiWithDiamonds", true ] },
+                        diamondWiseprice:{
+                            $cond: { 
+                              if: { "$eq": [ "$multiWithDiamonds", true ] },
                                 then: { "$multiply": ["$numOfDimonds","$loatPrice"] }, 
-                                else: { "$multiply": ["$loatWeight","$loatPrice"] } }
+                                else: 0 
+                              }
+                        },
+                        weightWiseprice:{
+                          $cond: { 
+                            if: { "$eq": [ "$multiWithDiamonds", false ] },
+                              then: { "$multiply": ["$loatWeight","$loatPrice"] },
+                              else: 0 
+                            },
                         },
                         partyId:{ $first:"$party._id" },
                         name:{ $first:"$party.name" },
@@ -290,13 +404,19 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
             },
         },
         {
-        $addFields:
-          {
+          $addFields:{
             totalWeight : { $sum: "$loats.loatWeight" },
             totalDimonds : { $sum: "$loats.numOfDimonds" },
-            totalPayment : { $sum: "$loats.price" },
+            totalWeightWisePayment : { $sum: "$loats.weightWiseprice" },
+            totalDimondsWisePayment : { $sum: "$loats.diamondWiseprice" },
           }
-      }
+        },
+        {
+          $addFields:{
+            totalPayment : { $sum: ["$totalWeightWisePayment", "$totalDimondsWisePayment"] },
+          }
+        },
+        { $sort : { _id : 1 } }
     ])
 
     res.send(successRes(loats)) // get success response
@@ -305,10 +425,39 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
   }
 }
 
+
+const getAllEntryDate = async (req, res, next) => {
+  try {
+    const { _id } = req.user // login user bodyData
+
+    const loats = await model.Loat.aggregate([
+        {
+          $match :{ $and:  [{ userId: _id }, { isDelete : false } ] }
+        },
+        {
+          $group: {
+              _id:"$entryDate",
+              totalWeight: {
+                  $sum: "$loatWeight"
+              },
+              totalDimonds: {
+                  $sum: "$numOfDimonds"
+              }
+          }
+        }
+      ])
+
+    res.send(successRes(loats))
+  } catch (error) {
+    res.send(errorRes(error.message))
+  }
+}
+
 export const PartyController = {
   getParty,
   addParty,
   updateParty,
   getPartyLoatDateWise,
-  getAllPartyLoatsDateWise
+  getAllPartyLoatsDateWise,
+  getAllEntryDate
 }

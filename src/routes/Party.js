@@ -8,5 +8,6 @@ Party.get("/:partyId", PartyController.getPartyLoatDateWise)
 Party.post("/",PartyController.addParty)
 Party.post("/getAllParty/", PartyController.getAllPartyLoatsDateWise)
 Party.patch("/", PartyController.updateParty)
+Party.post("/getAllLoatDate", PartyController.getAllEntryDate)
 
 export default Party

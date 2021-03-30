@@ -1,4 +1,5 @@
 import fs from "fs"
+import moment from "moment"
 import path from "path"
 import { config } from "../../config"
 
@@ -303,6 +304,10 @@ const getRandomNumber = () => {
       .substring(1)
 }
 
+const formatDate = (date) => {
+  return `${moment(moment(date, 'DD-MM-YYYY')).format('YYYY-MM-DD')}T05:30:00.000+05:30`
+}
+
 const helper = {
     removeFile,
     moveFile,
@@ -312,7 +317,8 @@ const helper = {
     removeCategoryFile,
     moveItemFile,
     removeItemFile,
-    getRandomNumber
+    getRandomNumber,
+    formatDate
 }
 
 export { errorRes, successRes, successMessage, errorMessage }

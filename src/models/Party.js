@@ -20,6 +20,9 @@ const PartySchema = new mongoose.Schema(
           type:Number,
           default:0
         },
+        date: {
+          type:String,
+        },
         deductionAmount: {
           type:Number,
           default:0
@@ -58,6 +61,16 @@ const PartySchema = new mongoose.Schema(
             type:Boolean,
             default:false
           },
+          isActive: {
+              type: Boolean,
+              default: 1,
+              enum: [0, 1] //0 = not Active, 1 = Active
+          },
+          isDelete: {
+              type: Boolean,
+              default: 0,
+              enum: [0, 1] //0 = Not Deleted, 1 = Deleted
+          }
         },
       ]
     },

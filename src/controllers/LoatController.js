@@ -1,5 +1,5 @@
 import moment from "moment"
-import { errorRes, successRes } from "../functions/helper"
+import helper, { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
 import LoatSchema from "../validation/LoatSchema"
 
@@ -26,6 +26,8 @@ const getLoat = async (req, res, next) => {
 
     let loat = await model.Loat.paginate(query, options)
 
+    console.log('loat', loat);
+
     res.send(successRes(loat)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
@@ -36,26 +38,25 @@ const getLoat = async (req, res, next) => {
 const addLoat = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
-    const {loats} = req.body
+    let {loats} = req.body
     if(loats && !loats.length){
       throw { message: 'Invalid Data passed'}
     }
 
-    const bodyData = JSON.parse(loats).map((data) => {
-      data.userId = _id
-      if (!data.entryDate) {
-        data.entryDate = moment(new Date()).format('YYYY-MM-DD')
-        console.log('data.entryDate',data.entryDate);
-        return data
+    let bodyData = []
+    loats = JSON.parse(loats)
+    const totalLength = loats.length;
+
+    for (let i=0; i<totalLength; i++) {
+      loats[i].userId = _id
+      if (!loats[i].entryDate) {
+        loats[i].entryDate = await helper.formatDate(new Date())
+        bodyData.push(loats[i])
       } else {
-        data.entryDate = moment(data.entryDate).format('YYYY-MM-DD')
-        console.log('data.entryDate',data.entryDate);
-
-        return data
+        loats[i].entryDate = await helper.formatDate(loats[i].entryDate)
+        bodyData.push(loats[i])
       }
-    })
-
-    // console.log('bodyData', bodyData);
+    }
     
     // const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
 
@@ -76,7 +77,8 @@ const updateLoat = async (req, res, next) => {
 
     const { _id } = req.user // login user bodyData
     const updateData = req.body
-    
+    const partyId = updateData.partyId || ""
+
     // update edited time
     updateData["updatedAt"] = new Date()
     const isValidate = await LoatSchema.checkUpdateLoatInputValidate(
@@ -88,9 +90,18 @@ const updateLoat = async (req, res, next) => {
       throw { message: isValidate.message }
     }
 
+    if (partyId == '') {
+      console.log('partyId',partyId);
+      delete updateData.partyId
+    }
+
+    if (updateData.entryDate) {
+      updateData.entryDate = moment(updateData.entryDate).format('YYYY-MM-DD')
+    }
+
     const loat = await model.Loat.findByIdAndUpdate(
       // update loat bodyData and get latest bodyData
-      { _id: updateData.loatId, partyId: updateData.partyId },
+      { _id: updateData.loatId },
       {
         $set: { ...updateData, userId: _id},
       },

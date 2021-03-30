@@ -1,5 +1,3 @@
-import { isEmail } from "validator"
-import { model } from "../models"
 import { errorRes, successMessage } from "../functions/helper"
 
 const checkAddLoatInputValidate = (req) => {
@@ -39,9 +37,9 @@ const checkUpdateLoatInputValidate = (req, LoginId) => {
   return new Promise(async (resolve, reject) => {
     const keys = Object.keys(req)
     // partyId
-    if (Array.isArray(keys) && !keys.includes("partyId") || req.partyId == "") {
-      resolve(errorRes("Please Enter party Id"))
-    }
+    // if (Array.isArray(keys) && !keys.includes("partyId") || req.partyId == "") {
+    //   resolve(errorRes("Please Enter party Id"))
+    // }
 
     // loatId
     if (Array.isArray(keys) && !keys.includes("loatId") || req.loatId == "") {

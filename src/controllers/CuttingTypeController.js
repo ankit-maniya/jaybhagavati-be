@@ -37,7 +37,7 @@ const addCuttingType = async (req, res, next) => {
     res.send(successRes(getCuttingData)) // get success response
   } catch (error) {
     res.send(errorRes(error.message)) // get error response
-  }``
+  }
 }
 
 const updateCuttingType = async (req, res, next) => {
@@ -67,21 +67,27 @@ const updateCuttingType = async (req, res, next) => {
     if (updateData["cuttingType"]) {
       updateData["cuttingType"].map((cuttingData) => {
 
-        if (cuttingData._id && cuttingData._id !== "") {
-          let getIndex = getCuttingData.cuttingType.findIndex((d) => d._id.toString() == cuttingData._id)
+        const cutID = cuttingData._id || ""
+
+        if (cutID !== "") {
+          let getIndex = getCuttingData.cuttingType.findIndex((d) => d._id.toString() == cutID._id)
 
           if (getIndex !== -1) {
             getCuttingData.cuttingType[getIndex] = cuttingData
             cuttingTypeData.push(getCuttingData.cuttingType[getIndex])
             getCuttingData.cuttingType.splice(getIndex,1);
           } else {
-            throw { message : `update id ==> ${cuttingData._id} Not Exists` }
+            throw { message : `update id ==> ${cutID._id} Not Exists` }
           }
 
         } else {
           let typeExist = getCuttingData.cuttingType.find((d) => d.cutType === cuttingData.cutType)
 
           if (!typeExist) {
+            if(cutID === ""){
+              delete cuttingData._id
+            }
+            
             cuttingTypeData.push(cuttingData)
           } else {
             throw { message : `${typeExist.cutType} Cutting Type is Already Exists` }
@@ -106,7 +112,6 @@ const updateCuttingType = async (req, res, next) => {
 
     res.send(successRes(CuttingType)) // get success response
   } catch (error) {
-    console.log('error', error)
     res.send(errorRes(error.message)) // get error response
   }
 }
