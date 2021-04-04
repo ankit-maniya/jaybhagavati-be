@@ -10,7 +10,7 @@ const checkAddCuttingTypeInputValidate = (req) => {
     }
 
     // price
-    if (Array.isArray(keys) && !keys.includes("price") || req.price == "") {
+    if (Array.isArray(keys) && !keys.includes("price") && req.price == "") {
       resolve(errorRes("Please Enter price"))
     }
 
@@ -28,33 +28,33 @@ const checkUpdateCuttingTypeInputValidate = (req, LoginId) => {
     }
 
     // cutType
-    if (Array.isArray(keys) && keys.includes("cutType") || req.cutType == "") {
+    if (Array.isArray(keys) && keys.includes("cutType") && req.cutType == "") {
       resolve(errorRes("Please Enter cutType"))
     }
 
     // price
-    if (Array.isArray(keys) && keys.includes("price") || req.price == "") {
+    if (Array.isArray(keys) && keys.includes("price") && req.price == "") {
       resolve(errorRes("Please Enter price"))
     }
 
 
     // isActive
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isActive") &&
-      ![0, 1].includes(req.isActive)
-    ) {
-      resolve(errorRes("Please Enter isActive type!"))
-    }
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isActive") &&
+    //   ![0, 1].includes(req.isActive)
+    // ) {
+    //   resolve(errorRes("Please Enter isActive type!"))
+    // }
 
     // isDelete
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isDelete") &&
-      ![0, 1].includes(req.isDelete)
-    ) {
-      resolve(errorRes("Please Enter Proper isDelete type!"))
-    }
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isDelete") &&
+    //   ![0, 1].includes(req.isDelete)
+    // ) {
+    //   resolve(errorRes("Please Enter Proper isDelete type!"))
+    // }
 
     resolve(successMessage("valid data"))
   })

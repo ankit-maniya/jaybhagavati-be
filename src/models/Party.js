@@ -7,7 +7,6 @@ const PartySchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique:true,
     },
     billingName: {
       type: String,
