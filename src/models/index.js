@@ -4,6 +4,7 @@ import Party from "./Party"
 import CuttingType from "./CuttingType"
 import Loat from "./Loat"
 import Bill from "./Bill"
+import Balance from "./Balance"
 import mongoose from "mongoose"
 import { config } from "../../config"
 
@@ -22,5 +23,6 @@ export const model = {
   CuttingType,
   Loat,
   Bill,
+  Balance,
   UserActivity
 }

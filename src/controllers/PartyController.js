@@ -491,7 +491,7 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
             $lookup: {
               from: "parties",
               localField: "partyId",
-              foreignField: _id,
+              foreignField: "_id",
               as: "party"
             }
         },
@@ -567,8 +567,13 @@ const getAllEntryDate = async (req, res, next) => {
               },
               totalDimonds: {
                   $sum: "$numOfDimonds",
-              }
+              },
           }
+        },
+        {
+          $sort: { 
+                  _id: 1 
+              },
         },
         {
           $group: {
@@ -591,7 +596,7 @@ const getAllEntryDate = async (req, res, next) => {
           }
         },
         {
-          $sort: { _id: -1 } 
+          $sort: { _id: 1 } 
         }
       ])
 

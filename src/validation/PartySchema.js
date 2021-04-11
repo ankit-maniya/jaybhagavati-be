@@ -28,7 +28,11 @@ const checkAddPartyInputValidate = (req) => {
       } else if(keys.includes("email")){
         const found = await model.Party.findOne({ email: req.email })
         if (found) {
-          resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
+          if(found.isDelete){
+            resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:found._id}))
+            return
+          }
+          resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:''}))
         }
       }
     }
@@ -41,7 +45,11 @@ const checkAddPartyInputValidate = (req) => {
       } else {
         const found = await model.Party.findOne({ mobile: req.mobile })
         if (found) {
-          resolve(errorRes("Mobile is Alredy Register! Use Diffrent Mobile!"))
+          if(found.isDelete){
+            resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:found._id}))
+            return
+          }
+          resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:''}))
         }
       }
     }
@@ -134,23 +142,23 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
       }
     }
 
-    // isActive
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isActive") &&
-      ![0, 1].includes(req.isActive)
-    ) {
-      resolve(errorRes("Please Enter isActive type!"))
-    }
+    // // isActive
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isActive") &&
+    //   ![0, 1].includes(req.isActive)
+    // ) {
+    //   resolve(errorRes("Please Enter isActive type!"))
+    // }
 
-    // isDelete
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isDelete") &&
-      ![0, 1].includes(req.isDelete)
-    ) {
-      resolve(errorRes("Please Enter Proper isDelete type!"))
-    }
+    // // isDelete
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isDelete") &&
+    //   ![0, 1].includes(req.isDelete)
+    // ) {
+    //   resolve(errorRes("Please Enter Proper isDelete type!"))
+    // }
 
     resolve(successMessage("valid data"))
   })

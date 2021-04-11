@@ -13,6 +13,10 @@ const PartySchema = new mongoose.Schema(
       required: true,
       unique:true,
     },
+    // openingBalance: {
+    //   type: Number,
+    //   default: 0,
+    // },
     balanceSheet: [{
         _id:false,
         oldBalance: {
