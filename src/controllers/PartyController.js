@@ -21,7 +21,7 @@ const getParty = async (req, res, next) => {
       // }
     }
 
-    let party = await model.Party.find(query).sort({ 'name':1})
+    let party = await model.Party.find(query).sort({ 'createdAt':1})
 
     res.send(successRes(party)) // get success response
   } catch (error) {
@@ -97,9 +97,9 @@ const updateParty = async (req, res, next) => {
 
     const { _id } = req.user // login user bodyData
     const updateData = req.body
-    
+
     if (req.body.cuttingType) {
-      updateData.cuttingType = JSON.parse(req.body.cuttingType) // cuttingType is json stringyfied
+      updateData.cuttingType = [JSON.parse(req.body.cuttingType)] // cuttingType is json stringyfied
     }
 
     if (req.body.balanceSheet) {
@@ -136,21 +136,22 @@ const updateParty = async (req, res, next) => {
     // }
 
     // add cuttingType with push old cuttingType (combine) updateData
+
     let cuttingTypeData = []
     if (updateData["cuttingType"]) {
       updateData["cuttingType"].map((cuttingData) => {
 
-        const cutID = cuttingData._id || ""
+        const cutID = cuttingData.update_id || ""
 
         if (cutID !== "") {
-          let getIndex = partyData.cuttingType.findIndex((d) => d._id.toString() == cutID._id)
+          let getIndex = partyData.cuttingType.findIndex((d) => d._id.toString() == cutID)
 
           if (getIndex !== -1) {
             partyData.cuttingType[getIndex] = cuttingData
             cuttingTypeData.push(partyData.cuttingType[getIndex])
             partyData.cuttingType.splice(getIndex,1);
           } else {
-            throw { message : `update id ==> ${cutID._id} Not Exists` }
+            throw { message : `update id ==> ${cutID} Not Exists` }
           }
 
         } else {
@@ -158,7 +159,7 @@ const updateParty = async (req, res, next) => {
 
           if (!typeExist) {
             if(cutID === ""){
-              delete cuttingData._id
+              delete cuttingData.update_id
             }
             
             cuttingTypeData.push(cuttingData)
@@ -196,6 +197,8 @@ const updateParty = async (req, res, next) => {
 
     res.send(successRes(party)) // get success response
   } catch (error) {
+
+    console.log(error);
     res.send(errorRes(error.message)) // get error response
   }
 }
@@ -215,13 +218,13 @@ const getPartyLoatDateWise = async (req, res, next) => {
                   $and:  [
                       { partyId: ObjectId(partyId)},
                       { userId: _id },
-                      { isDelete : false },
+                      { isDelete: false },
                       {
                           cuttingType:{
                               "$exists": true,
-                              "$ne": null
+                              "$ne": null,
                           }
-                      }
+                      },
                   ]
               }
           },
@@ -256,22 +259,53 @@ const getPartyLoatDateWise = async (req, res, next) => {
                   },
               },
           },
-          { $sort : { "_id" : -1 } }
+          { $sort : { _id : -1 } }
       ])
 
-    let party = await model.Party.findOne({ _id: ObjectId(partyId) })
-      party = party || {}
+    let party = await model.Party.aggregate([
+        {
+            $match :{
+                $and:  [
+                    { _id: ObjectId(partyId)},
+                    { userId: _id },
+                ]
+            }
+        },
+        {
+            $project: {
+                _id:1,
+                isActive : 1,
+                isDelete : 1,
+                mobile : 1,
+                name : 1,
+                billingName : 1,
+                userId:1,
+                balanceSheet: 1,
+                createdAt:1,
+                updatedAt: 1,
+                cuttingType : {
+                  $filter: {
+                  input: "$cuttingType",
+                  as: "item",
+                  cond: {$eq: ["$$item.isDelete", false]}
+                }
+              }
+            }
+        }
+      ])
+
+    party = party[0] || {}
 
     let allKeys = {
       TotalDimonds: 0,
       TotalWeight: 0,
+      TotalAmount: 0,
       TotalDiamondWiseCount: 0,
       TotalDiamondWiseWeight: 0,
       TotalDiamondWiseAmount: 0,
       TotalWeightWiseCount: 0,
       TotalWeightWiseWeight: 0,
       TotalWeightWiseAmount: 0,
-      TotalAmount: 0,
       paymentDetails:[]
     }
     
@@ -282,13 +316,13 @@ const getPartyLoatDateWise = async (req, res, next) => {
               allKeys.paymentDetails.push(
                   {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
                   {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
+                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
                   {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
                   {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
                   {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
                   {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
                   {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
                   {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price}
               )
           })
       }
@@ -307,13 +341,13 @@ const getPartyLoatDateWise = async (req, res, next) => {
           let newAllKeys = {
               TotalDimonds: 0,
               TotalWeight: 0,
+              TotalAmount: 0,
               TotalDiamondWiseCount: 0,
               TotalDiamondWiseWeight: 0,
               TotalDiamondWiseAmount: 0,
               TotalWeightWiseCount: 0,
               TotalWeightWiseWeight: 0,
               TotalWeightWiseAmount: 0,
-              TotalAmount: 0,
               paymentDetails:[]
           }
 
@@ -321,13 +355,13 @@ const getPartyLoatDateWise = async (req, res, next) => {
             newAllKeys.paymentDetails.push(
                 {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
                 {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
+                {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
                 {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
                 {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
                 {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
                 {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
                 {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
                 {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                {key: `Total Amount (${type.cutType})`, value: 0, price:type.price}
             )
           })
 
@@ -336,27 +370,27 @@ const getPartyLoatDateWise = async (req, res, next) => {
 
             const index1 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Diamonds (${tLoat[j]._id.type})`)
             const index2 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Weight (${tLoat[j]._id.type})`)
-            const index3 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Count (${tLoat[j]._id.type})`)
-            const index4 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Weight (${tLoat[j]._id.type})`)
-            const index5 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Amount (${tLoat[j]._id.type})`)
-            const index6 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Diamond (${tLoat[j]._id.type})`)
-            const index7 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Weight (${tLoat[j]._id.type})`)
-            const index8 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Amount (${tLoat[j]._id.type})`)
-            const index9 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Amount (${tLoat[j]._id.type})`)
+            const index3 = allKeys.paymentDetails.findIndex((d) => d.key === `Total Amount (${tLoat[j]._id.type})`)
+            const index4 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Count (${tLoat[j]._id.type})`)
+            const index5 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Weight (${tLoat[j]._id.type})`)
+            const index6 = allKeys.paymentDetails.findIndex((d) => d.key === `Diamond Wise Amount (${tLoat[j]._id.type})`)
+            const index7 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Diamond (${tLoat[j]._id.type})`)
+            const index8 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Weight (${tLoat[j]._id.type})`)
+            const index9 = allKeys.paymentDetails.findIndex((d) => d.key === `Weight Wise Amount (${tLoat[j]._id.type})`)
             const loatsLength = tLoat[j].loats.length
             const allLoats = tLoat[j].loats
-            if ((index3 !== -1 || index6 !== -1) && loatsLength > 0) {
+            if ((index4 !== -1 || index7 !== -1) && loatsLength > 0) {
 
               for (let k=0; k<loatsLength; k++) {
                 if (allLoats[k].multiWithDiamonds) {
-                  if (index3 !== -1) {
+                  if (index4 !== -1) {
                     allKeys.paymentDetails[index1].value += allLoats[k].numOfDimonds
                     allKeys.paymentDetails[index2].value += allLoats[k].loatWeight
-                    allKeys.paymentDetails[index9].value += allLoats[k].price
+                    allKeys.paymentDetails[index3].value += allLoats[k].price
 
-                    allKeys.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                    allKeys.paymentDetails[index4].value += allLoats[k].loatWeight
-                    allKeys.paymentDetails[index5].value += allLoats[k].price
+                    allKeys.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                    allKeys.paymentDetails[index5].value += allLoats[k].loatWeight
+                    allKeys.paymentDetails[index6].value += allLoats[k].price
 
                     allKeys.TotalDimonds += allLoats[k].numOfDimonds
                     allKeys.TotalWeight += allLoats[k].loatWeight
@@ -367,11 +401,11 @@ const getPartyLoatDateWise = async (req, res, next) => {
 
                     newAllKeys.paymentDetails[index1].value += allLoats[k].numOfDimonds
                     newAllKeys.paymentDetails[index2].value += allLoats[k].loatWeight
-                    newAllKeys.paymentDetails[index9].value += allLoats[k].price
+                    newAllKeys.paymentDetails[index3].value += allLoats[k].price
 
-                    newAllKeys.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                    newAllKeys.paymentDetails[index4].value += allLoats[k].loatWeight
-                    newAllKeys.paymentDetails[index5].value += allLoats[k].price
+                    newAllKeys.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                    newAllKeys.paymentDetails[index5].value += allLoats[k].loatWeight
+                    newAllKeys.paymentDetails[index6].value += allLoats[k].price
 
                     newAllKeys.TotalDimonds += allLoats[k].numOfDimonds
                     newAllKeys.TotalWeight += allLoats[k].loatWeight
@@ -384,15 +418,15 @@ const getPartyLoatDateWise = async (req, res, next) => {
                     typeWiseTotal.loatsCaret += allLoats[k].loatWeight
                   }
                 } else {
-                  if (index6 !== -1) {
+                  if (index7 !== -1) {
 
                     allKeys.paymentDetails[index1].value += allLoats[k].numOfDimonds
                     allKeys.paymentDetails[index2].value += allLoats[k].loatWeight
-                    allKeys.paymentDetails[index9].value += allLoats[k].price
+                    allKeys.paymentDetails[index3].value += allLoats[k].price
 
-                    allKeys.paymentDetails[index6].value += allLoats[k].numOfDimonds
-                    allKeys.paymentDetails[index7].value += allLoats[k].loatWeight
-                    allKeys.paymentDetails[index8].value += allLoats[k].price
+                    allKeys.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                    allKeys.paymentDetails[index8].value += allLoats[k].loatWeight
+                    allKeys.paymentDetails[index9].value += allLoats[k].price
 
                     allKeys.TotalDimonds += allLoats[k].numOfDimonds
                     allKeys.TotalWeight += allLoats[k].loatWeight
@@ -403,11 +437,11 @@ const getPartyLoatDateWise = async (req, res, next) => {
 
                     newAllKeys.paymentDetails[index1].value += allLoats[k].numOfDimonds
                     newAllKeys.paymentDetails[index2].value += allLoats[k].loatWeight
-                    newAllKeys.paymentDetails[index9].value += allLoats[k].price
+                    newAllKeys.paymentDetails[index3].value += allLoats[k].price
 
-                    newAllKeys.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                    newAllKeys.paymentDetails[index4].value += allLoats[k].loatWeight
-                    newAllKeys.paymentDetails[index5].value += allLoats[k].price
+                    newAllKeys.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                    newAllKeys.paymentDetails[index5].value += allLoats[k].loatWeight
+                    newAllKeys.paymentDetails[index6].value += allLoats[k].price
 
                     newAllKeys.TotalDimonds += allLoats[k].numOfDimonds
                     newAllKeys.TotalWeight += allLoats[k].loatWeight
@@ -457,7 +491,7 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
             $lookup: {
               from: "parties",
               localField: "partyId",
-              foreignField: "_id",
+              foreignField: _id,
               as: "party"
             }
         },
@@ -557,7 +591,7 @@ const getAllEntryDate = async (req, res, next) => {
           }
         },
         {
-          $sort: { "_id": -1 } 
+          $sort: { _id: -1 } 
         }
       ])
 
@@ -647,22 +681,53 @@ const getPartyLoatYearWise = async (req, res, next) => {
             yearWiseLoats:1
           }
         },
-        { $sort : { "year" : 1 } },
+        { $sort : { "year" : -1 } },
     ])
 
-    let party = await model.Party.findOne({ _id: ObjectId(partyId) })
-      party = party || {}
+    let party = await model.Party.aggregate([
+        {
+            $match :{
+                $and:  [
+                    { _id: ObjectId(partyId)},
+                    { userId: _id },
+                ]
+            }
+        },
+        {
+            $project: {
+                _id:1,
+                isActive : 1,
+                isDelete : 1,
+                mobile : 1,
+                name : 1,
+                billingName : 1,
+                userId:1,
+                balanceSheet: 1,
+                createdAt:1,
+                updatedAt: 1,
+                cuttingType : {
+                  $filter: {
+                  input: "$cuttingType",
+                  as: "item",
+                  cond: {$eq: ["$$item.isDelete", false]}
+                }
+              }
+            }
+        }
+      ])
+      
+    party = party[0] || {}
 
     let allTotal = {
       TotalDimonds: 0,
       TotalWeight: 0,
+      TotalAmount: 0,
       TotalDiamondWiseCount: 0,
       TotalDiamondWiseWeight: 0,
       TotalDiamondWiseAmount: 0,
       TotalWeightWiseCount: 0,
       TotalWeightWiseWeight: 0,
       TotalWeightWiseAmount: 0,
-      TotalAmount: 0,
       paymentDetails:[]
     }
     
@@ -673,17 +738,17 @@ const getPartyLoatYearWise = async (req, res, next) => {
             allTotal.paymentDetails.push(
                 {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
                 {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
+                {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
                 {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
                 {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
                 {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
                 {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
                 {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
                 {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                {key: `Total Amount (${type.cutType})`, value: 0, price:type.price}
             )
         })
     }
-    
+
     const yearLoats = loats
     const totalYearLength = loats.length
     if (yearLoats && totalYearLength > 0) {
@@ -695,19 +760,20 @@ const getPartyLoatYearWise = async (req, res, next) => {
         let yearWiseTotal = {
           TotalDimonds: 0,
           TotalWeight: 0,
+          TotalAmount: 0,
           TotalDiamondWiseCount: 0,
           TotalDiamondWiseWeight: 0,
           TotalDiamondWiseAmount: 0,
           TotalWeightWiseCount: 0,
           TotalWeightWiseWeight: 0,
           TotalWeightWiseAmount: 0,
-          TotalAmount: 0,
           paymentDetails:[]
         }
 
         partyDetail.map((type) => {
           yearWiseTotal.paymentDetails.push(
               {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
+              {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
               {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
               {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
               {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
@@ -715,7 +781,6 @@ const getPartyLoatYearWise = async (req, res, next) => {
               {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
               {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
               {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-              {key: `Total Amount (${type.cutType})`, value: 0, price:type.price}
           )
         })
         if (yearWiseLoats && totalMonthLength > 0) {
@@ -727,13 +792,13 @@ const getPartyLoatYearWise = async (req, res, next) => {
             let monthWiseTotal = {
               TotalDimonds: 0,
               TotalWeight: 0,
+              TotalAmount: 0,
               TotalDiamondWiseCount: 0,
               TotalDiamondWiseWeight: 0,
               TotalDiamondWiseAmount: 0,
               TotalWeightWiseCount: 0,
               TotalWeightWiseWeight: 0,
               TotalWeightWiseAmount: 0,
-              TotalAmount: 0,
               paymentDetails:[]
             }
 
@@ -741,13 +806,13 @@ const getPartyLoatYearWise = async (req, res, next) => {
               monthWiseTotal.paymentDetails.push(
                   {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
                   {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
+                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
                   {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
                   {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
                   {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
                   {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
                   {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
                   {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price}
               )
             })
 
@@ -764,13 +829,13 @@ const getPartyLoatYearWise = async (req, res, next) => {
                 let dayWiseTotal = {
                     TotalDimonds: 0,
                     TotalWeight: 0,
+                    TotalAmount: 0,
                     TotalDiamondWiseCount: 0,
                     TotalDiamondWiseWeight: 0,
                     TotalDiamondWiseAmount: 0,
                     TotalWeightWiseCount: 0,
                     TotalWeightWiseWeight: 0,
                     TotalWeightWiseAmount: 0,
-                    TotalAmount: 0,
                     paymentDetails:[]
                 }
 
@@ -778,43 +843,43 @@ const getPartyLoatYearWise = async (req, res, next) => {
                     dayWiseTotal.paymentDetails.push(
                         {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
                         {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
+                        {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
                         {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
                         {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
                         {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
                         {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
                         {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
                         {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                        {key: `Total Amount (${type.cutType})`, value: 0, price:type.price}
                     )
                 })
 
                 if (totalTypeWiseLoatLength > 0) {
                   for (let j=0; j<totalTypeWiseLoatLength; j++) {
 
-                    const index1 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Diamonds (${tLoat[j]._id.type})`)
-                    const index2 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Weight (${tLoat[j]._id.type})`)
-                    const index3 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Count (${tLoat[j]._id.type})`)
-                    const index4 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Weight (${tLoat[j]._id.type})`)
-                    const index5 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Amount (${tLoat[j]._id.type})`)
-                    const index6 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Diamond (${tLoat[j]._id.type})`)
-                    const index7 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Weight (${tLoat[j]._id.type})`)
-                    const index8 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Amount (${tLoat[j]._id.type})`)
-                    const index9 = monthWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Amount (${tLoat[j]._id.type})`)
+                    const index1 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Diamonds (${tLoat[j]._id.type})`)
+                    const index2 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Weight (${tLoat[j]._id.type})`)
+                    const index3 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Amount (${tLoat[j]._id.type})`)
+                    const index4 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Count (${tLoat[j]._id.type})`)
+                    const index5 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Weight (${tLoat[j]._id.type})`)
+                    const index6 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Amount (${tLoat[j]._id.type})`)
+                    const index7 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Diamond (${tLoat[j]._id.type})`)
+                    const index8 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Weight (${tLoat[j]._id.type})`)
+                    const index9 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Amount (${tLoat[j]._id.type})`)
                     const loatsLength = tLoat[j].loats.length
                     const allLoats = tLoat[j].loats
-                    if ((index3 !== -1 || index6 !== -1) && loatsLength > 0) {
+
+                    if ((index4 !== -1 || index7 !== -1) && loatsLength > 0) {
 
                       for (let k=0; k<loatsLength; k++) {
                         if (allLoats[k].multiWithDiamonds) {
-                          if (index3 !== -1) {
-
+                          if (index4 !== -1) {
                             allTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             allTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            allTotal.paymentDetails[index9].value += allLoats[k].price
+                            allTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            allTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            allTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            allTotal.paymentDetails[index5].value += allLoats[k].price
+                            allTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                            allTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                            allTotal.paymentDetails[index6].value += allLoats[k].price
 
                             allTotal.TotalDimonds += allLoats[k].numOfDimonds
                             allTotal.TotalWeight += allLoats[k].loatWeight
@@ -825,11 +890,11 @@ const getPartyLoatYearWise = async (req, res, next) => {
 
                             yearWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             yearWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            yearWiseTotal.paymentDetails[index9].value += allLoats[k].price
+                            yearWiseTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            yearWiseTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            yearWiseTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            yearWiseTotal.paymentDetails[index5].value += allLoats[k].price
+                            yearWiseTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                            yearWiseTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                            yearWiseTotal.paymentDetails[index6].value += allLoats[k].price
 
                             yearWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
                             yearWiseTotal.TotalWeight += allLoats[k].loatWeight
@@ -840,11 +905,11 @@ const getPartyLoatYearWise = async (req, res, next) => {
 
                             monthWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             monthWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            monthWiseTotal.paymentDetails[index9].value += allLoats[k].price
+                            monthWiseTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            monthWiseTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            monthWiseTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            monthWiseTotal.paymentDetails[index5].value += allLoats[k].price
+                            monthWiseTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                            monthWiseTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                            monthWiseTotal.paymentDetails[index6].value += allLoats[k].price
 
                             monthWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
                             monthWiseTotal.TotalWeight += allLoats[k].loatWeight
@@ -855,11 +920,11 @@ const getPartyLoatYearWise = async (req, res, next) => {
 
                             dayWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             dayWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            dayWiseTotal.paymentDetails[index9].value += allLoats[k].price
+                            dayWiseTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            dayWiseTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            dayWiseTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            dayWiseTotal.paymentDetails[index5].value += allLoats[k].price
+                            dayWiseTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                            dayWiseTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                            dayWiseTotal.paymentDetails[index6].value += allLoats[k].price
 
                             dayWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
                             dayWiseTotal.TotalWeight += allLoats[k].loatWeight
@@ -872,45 +937,44 @@ const getPartyLoatYearWise = async (req, res, next) => {
                             typeWiseTotal.loatsCaret += allLoats[k].loatWeight
                           }
                         } else {
-                          if (index6 !== -1) {
-
+                          if (index7 !== -1) {
                             allTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             allTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            allTotal.paymentDetails[index9].value += allLoats[k].price
+                            allTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            allTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            allTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            allTotal.paymentDetails[index5].value += allLoats[k].price
+                            allTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                            allTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                            allTotal.paymentDetails[index9].value += allLoats[k].price
 
                             allTotal.TotalDimonds += allLoats[k].numOfDimonds
                             allTotal.TotalWeight += allLoats[k].loatWeight
-                            allTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
-                            allTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
-                            allTotal.TotalDiamondWiseAmount += allLoats[k].price
+                            allTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                            allTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                            allTotal.TotalWeightWiseAmount += allLoats[k].price
                             allTotal.TotalAmount += allLoats[k].price
 
                             yearWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             yearWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            yearWiseTotal.paymentDetails[index9].value += allLoats[k].price
+                            yearWiseTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            yearWiseTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            yearWiseTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            yearWiseTotal.paymentDetails[index5].value += allLoats[k].price
+                            yearWiseTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                            yearWiseTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                            yearWiseTotal.paymentDetails[index9].value += allLoats[k].price
 
                             yearWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
                             yearWiseTotal.TotalWeight += allLoats[k].loatWeight
-                            yearWiseTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
-                            yearWiseTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
-                            yearWiseTotal.TotalDiamondWiseAmount += allLoats[k].price
+                            yearWiseTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                            yearWiseTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                            yearWiseTotal.TotalWeightWiseAmount += allLoats[k].price
                             yearWiseTotal.TotalAmount += allLoats[k].price
 
                             monthWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             monthWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            monthWiseTotal.paymentDetails[index9].value += allLoats[k].price
+                            monthWiseTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            monthWiseTotal.paymentDetails[index6].value += allLoats[k].numOfDimonds
-                            monthWiseTotal.paymentDetails[index7].value += allLoats[k].loatWeight
-                            monthWiseTotal.paymentDetails[index8].value += allLoats[k].price
+                            monthWiseTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                            monthWiseTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                            monthWiseTotal.paymentDetails[index9].value += allLoats[k].price
 
                             monthWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
                             monthWiseTotal.TotalWeight += allLoats[k].loatWeight
@@ -921,17 +985,17 @@ const getPartyLoatYearWise = async (req, res, next) => {
 
                             dayWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
                             dayWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
-                            dayWiseTotal.paymentDetails[index9].value += allLoats[k].price
+                            dayWiseTotal.paymentDetails[index3].value += allLoats[k].price
 
-                            dayWiseTotal.paymentDetails[index3].value += allLoats[k].numOfDimonds
-                            dayWiseTotal.paymentDetails[index4].value += allLoats[k].loatWeight
-                            dayWiseTotal.paymentDetails[index5].value += allLoats[k].price
+                            dayWiseTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                            dayWiseTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                            dayWiseTotal.paymentDetails[index9].value += allLoats[k].price
 
                             dayWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
                             dayWiseTotal.TotalWeight += allLoats[k].loatWeight
-                            dayWiseTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
-                            dayWiseTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
-                            dayWiseTotal.TotalDiamondWiseAmount += allLoats[k].price
+                            dayWiseTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                            dayWiseTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                            dayWiseTotal.TotalWeightWiseAmount += allLoats[k].price
                             dayWiseTotal.TotalAmount += allLoats[k].price
 
                             typeWiseTotal.loatsPrices += allLoats[k].price
@@ -942,7 +1006,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
                     }
                   }
                 }
-                
+
                 dateWiseLoats[date].dayWiseTotal = dayWiseTotal
               }
             }

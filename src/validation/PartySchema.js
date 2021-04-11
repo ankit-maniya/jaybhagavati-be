@@ -97,22 +97,22 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
       resolve(errorRes("Please Enter A billingName"))
     }
 
-    // cuttingType
-    if (Array.isArray(keys) && keys.includes("cuttingType") && req.cuttingType == []) {
-      resolve(errorRes("Please Enter A Cutting Type And It will be Array"))
-    } else {
-      if (keys.includes("cuttingType") && req.cuttingType != []) {
+    // // cuttingType
+    // if (Array.isArray(keys) && keys.includes("cuttingType") && req.cuttingType == []) {
+    //   resolve(errorRes("Please Enter A Cutting Type And It will be Array"))
+    // } else {
+    //   if (keys.includes("cuttingType") && req.cuttingType != []) {
 
-        req.cuttingType.map((cuttType) => {
+    //     req.cuttingType.map((cuttType) => {
 
-          const cutType = cuttType.cutType
-          const price = cuttType.price
+    //       const cutType = cuttType.cutType
+    //       const price = cuttType.price
 
-          if (cutType == "" || price == "" )
-            resolve(errorRes("Please Enter a Cutting Type"))
-        })
-      }
-    }
+    //       if (cutType == "" || price == "" )
+    //         resolve(errorRes("Please Enter a Cutting Type"))
+    //     })
+    //   }
+    // }
 
     // mobile
     if (Array.isArray(keys) && keys.includes("mobile") && req.mobile == "") {
