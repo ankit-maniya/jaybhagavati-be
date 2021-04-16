@@ -18,27 +18,28 @@ const PartySchema = new mongoose.Schema(
     //   default: 0,
     // },
     balanceSheet: [{
-        _id:false,
-        oldBalance: {
-          type:Number,
-          default:0
-        },
-        date: {
-          type:String,
-        },
-        deductionAmount: {
-          type:Number,
-          default:0
-        },
-        remainBalance: {
-          type:Number,
-          default:0
-        },
-        alloyAmount: {
-          type:Number,
-          default:0
-        },
-      }],
+      _id:false,
+      oldBalance: {
+        type:Number,
+        default:0
+      },
+      date: {
+        type:String,
+      },
+      deductionAmount: {
+        type:Number,
+        default:0
+      },
+      remainBalance: {
+        type:Number,
+        default:0
+      },
+      alloyAmount: {
+        type:Number,
+        default:0
+      },
+    }],
+    // newBalanceSheet: [{}],   
     userId: {
       type: ObjectId,
       required: true,

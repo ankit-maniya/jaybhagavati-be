@@ -5,6 +5,7 @@ const BalanceSchema = new mongoose.Schema(
   {
     partyId: {
       type: ObjectId,
+      required: true,
       ref:'Party'
     },
     userId: {
@@ -12,21 +13,30 @@ const BalanceSchema = new mongoose.Schema(
       required: true,
       ref:'User',
     },
-    openingBalance: {
-      type: Number,
-      default: 0,
-    },
-    balanceType: {
-      type: String,
-      default: "ADD",
-      enum: ["ADD", "DEDUCT", "REMAIN"]
-    },
     entryDate:{
       type: Date,
     },
-    isCovered: {
-        type: Boolean,
-        default: false,
+    billDate:{
+      type: Date,
+    },
+    billAmount: {
+      type: Number,
+      default:0,
+    },
+    paidAmount: {
+      type: Number,
+      default:0,
+    },
+    paidDate:{
+      type: Date,
+    },
+    remainAmount: {
+      type: Number,
+      default:0,
+    },
+    alloyAmount: {
+      type: Number,
+      default:0,
     },
     isActive: {
         type: Boolean,

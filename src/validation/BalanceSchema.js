@@ -9,9 +9,9 @@ const checkAddBalanceInputValidate = (req) => {
       resolve(errorRes("Please Enter A partyId"))
     }
 
-    // openingBalance
-    if (Array.isArray(keys) && !keys.includes("openingBalance")) {
-      resolve(errorRes("Please Enter A openingBalance"))
+    // billDate
+    if (Array.isArray(keys) && !keys.includes("billDate")) {
+      resolve(errorRes("Please Enter A billDate"))
     }
 
     resolve(successMessage("valid data"))
@@ -21,33 +21,31 @@ const checkAddBalanceInputValidate = (req) => {
 const checkUpdateBalanceInputValidate = (req, LoginId) => {
   return new Promise(async (resolve, reject) => {
     const keys = Object.keys(req)
-    // partyId
-    // if (Array.isArray(keys) && !keys.includes("partyId") || req.partyId == "") {
-    //   resolve(errorRes("Please Enter party Id"))
-    // }
 
     // balanceId
     if (Array.isArray(keys) && !keys.includes("balanceId") || req.balanceId == "") {
       resolve(errorRes("Please Enter Balance Id"))
     }
+    
+    // billDate
+    if (Array.isArray(keys) && keys.includes("billDate") && req.billDate == "") {
+      resolve(errorRes("Please Enter billDate"))
+    }
+    
+    // billAmount
+    if (Array.isArray(keys) && keys.includes("billAmount") && req.billAmount == "") {
+      resolve(errorRes("Please Enter billAmount"))
+    }
 
-    // // isActive
-    // if (
-    //   Array.isArray(keys) &&
-    //   keys.includes("isActive") &&
-    //   ![0, 1].includes(req.isActive)
-    // ) {
-    //   resolve(errorRes("Please Enter isActive type!"))
-    // }
+    // paidAmount
+    if (Array.isArray(keys) && keys.includes("paidAmount") && req.paidAmount == "") {
+      resolve(errorRes("Please Enter paidAmount"))
+    }
 
-    // // isDelete
-    // if (
-    //   Array.isArray(keys) &&
-    //   keys.includes("isDelete") &&
-    //   ![0, 1].includes(req.isDelete)
-    // ) {
-    //   resolve(errorRes("Please Enter Proper isDelete type!"))
-    // }
+    // paidDate
+    if (Array.isArray(keys) && keys.includes("paidDate") && req.paidDate == "") {
+      resolve(errorRes("Please Enter paidDate"))
+    }
 
     resolve(successMessage("valid data"))
   })

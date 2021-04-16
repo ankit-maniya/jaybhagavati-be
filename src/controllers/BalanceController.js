@@ -43,6 +43,10 @@ const addBalance = async (req, res, next) => {
       bodyData.entryDate = await helper.formatDate(new Date())
     }
 
+    if (bodyData.billDate) {
+      bodyData.billDate = await helper.formatDate(bodyData.billDate)
+    }
+
     if (isValidate.statuscode != 1) {
       throw { message: isValidate.message }
     }

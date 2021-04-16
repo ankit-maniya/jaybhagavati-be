@@ -5,6 +5,7 @@ import Party from "./Party"
 import User from "./User"
 import { me } from "../functions/auth"
 import CuttingType from "./CuttingType"
+import Balance from "./Balance"
 const route = express.Router()
 
 route.get("/", (req, res, next) => {
@@ -17,6 +18,7 @@ route.use("/party", me, Party)
 route.use("/cuttingType", me, CuttingType)
 route.use("/Loat", me, Loat)
 route.use("/Bill", me, Bill)
+route.use("/balance", me, Balance)
 
 export default route
 
