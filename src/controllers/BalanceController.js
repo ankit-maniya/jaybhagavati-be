@@ -17,7 +17,87 @@ const getBalance = async (req, res, next) => {
 
     query['userId'] = _id
 
-    let balance = await model.Balance.find(query).populate('partyId')
+    let balance = await model.Balance.find(query)
+
+    res.send(successRes(balance)) // get success response
+  } catch (error) {
+    res.send(errorRes(error.message)) // get error response
+  }
+}
+
+const getBalancePartyWise = async (req, res, next) => {
+  try {
+    const { _id } = req.user // login user bodyData
+    const { partyId } = req.params
+
+    if(!partyId) throw { message : `Please pass PartyId` }
+
+    let balance = await model.Balance.aggregate([
+      {
+        $match :{ 
+          $and:  [
+              { partyId: ObjectId(partyId)},
+              { userId: _id },
+              { isDelete : false },
+            ] 
+        }
+      },
+      {
+          '$lookup': {
+              'from': 'parties',
+              'localField': 'partyId',
+              'foreignField': '_id',
+              'as': 'party'
+          }
+      },
+      {
+        $group: {
+            _id:"$billDate",
+            details: {
+              $push: {
+                    balanceId:"$_id",
+                    billAmount:"$billAmount",
+                    paidAmount:"$paidAmount",
+                    remainAmount:"$remainAmount",
+                    alloyAmount:"$alloyAmount",
+                    partyId:{ $first:"$party._id" },
+                    name:{ $first:"$party.name" },
+                    mobile:{ $first:"$party.mobile" }
+                },
+            },
+            totalBalance: {
+                $sum:"$billAmount"
+            }
+        }
+      },
+      {
+        $sort: { 
+                _id: 1 
+            },
+      },
+      {
+        $group: {
+            _id : { "month":{$month:"$_id"}, "year": {$year:"$_id"} },
+            dayWiseDetails: {
+              $push: "$$ROOT"
+            },
+            monthTotalBalance: {
+                $sum:"$totalBalance"
+            }
+        }
+      },
+      {
+          $group : {
+              _id : "$_id.year",
+              yearWiseDetails: {
+                  $push: "$$ROOT"
+              },
+              yearTotalBalance: {
+                $sum:"$monthTotalBalance"
+            }
+          },
+      },
+  ])
 
     res.send(successRes(balance)) // get success response
   } catch (error) {
@@ -37,6 +117,12 @@ const addBalance = async (req, res, next) => {
       _id
     )
 
+    if (isValidate.statuscode != 1) {
+      throw { message: isValidate.message }
+    }
+
+    // if()
+
     if (bodyData.entryDate) {
       bodyData.entryDate = await helper.formatDate(bodyData.entryDate)
     } else {
@@ -45,10 +131,6 @@ const addBalance = async (req, res, next) => {
 
     if (bodyData.billDate) {
       bodyData.billDate = await helper.formatDate(bodyData.billDate)
-    }
-
-    if (isValidate.statuscode != 1) {
-      throw { message: isValidate.message }
     }
 
     let balanceData = await model.Balance.create({...bodyData, userId: _id}) // add balance bodyData
@@ -104,5 +186,6 @@ const updateBalance = async (req, res, next) => {
 export const BalanceController = {
   getBalance,
   addBalance,
-  updateBalance
+  updateBalance,
+  getBalancePartyWise
 }

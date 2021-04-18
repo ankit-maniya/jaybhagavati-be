@@ -13,6 +13,9 @@ const LoatSchema = new mongoose.Schema(
       required: true,
       ref:'User',
     },
+    typeId: {
+      type: ObjectId,
+    },
     loatWeight: {
       type: Number,
       required: true,

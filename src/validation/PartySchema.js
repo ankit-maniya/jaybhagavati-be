@@ -66,8 +66,9 @@ const checkAddPartyInputValidate = (req) => {
 
         const cutType = cuttType.cutType
         const price = cuttType.price
+        const typeId = cuttType.typeId
 
-        if (cutType == "" || price == "" )
+        if (cutType == "" || price == "" || typeId == "")
           resolve(errorRes("Please Enter a Cutting Type"))
       })
     }

@@ -66,6 +66,75 @@ const getParty = async (req, res, next) => {
   }
 }
 
+const getAllDeletedParty = async (req, res, next) => {
+  try {
+    const { _id } = req.user // login user bodyData
+
+    let { deletedParty, deletdCuttingType  } = req.query
+
+    deletdCuttingType = deletdCuttingType == 1 ? true : false
+    deletedParty = deletedParty == 1 ? true : false
+
+    let query = [
+        { isDelete : deletedParty },
+        { userId: _id },
+    ]
+
+    if (deletdCuttingType) {
+      query = [...query, { "cuttingType": { $exists:true, "$ne":[] } } ]
+    }
+
+    let party = await model.Party.aggregate([
+      {
+          $match :{
+              $and:  query
+          }
+      },
+      {
+        $sort: { createdAt:1 }
+      },
+      {
+          $unwind: "$cuttingType"
+      },
+      {
+          $match: { "cuttingType.isDelete": deletdCuttingType }
+      },
+      {
+          $group: { 
+              _id: "$_id",
+              data: { $push: "$$ROOT" }
+          }
+      },
+        {
+        $replaceRoot: {
+          newRoot: { $mergeObjects: [{ cuttingType: '$data.cuttingType' }, '$$ROOT'] }
+        }
+      },
+      {
+          $project: {
+              _id:1,
+              "isActive" : { $first: "$data.isActive"},
+            "isDelete" : { $first: "$data.isDelete"},
+            "mobile" : { $first: "$data.mobile"},
+            "name" : { $first: "$data.name"},
+            "billingName" : { $first: "$data.billingName"},
+              "userId":{ $first: "$data.userId"},
+              "cuttingType":1,
+              "balanceSheet": { $first: "$data.balanceSheet" },
+              "createdAt":{ $first: "$data.createdAt"},
+              "updatedAt": { $first: "$data.updatedAt"}
+          }
+      }
+    ])
+
+    party = party || []
+
+    res.send(successRes(party)) // get success response
+  } catch (error) {
+    res.send(errorRes(error.message)) // get error response
+  }
+}
+
 const getSingleParty = async (req, res, next) => {
     try {
         const { _id } = req.user // login user bodyData
@@ -149,9 +218,7 @@ const updateParty = async (req, res, next) => {
       updateData,
       _id
     )
-
-    const partyData = await model.Party.findOne({ _id: req.body.partyId })
-
+    
     if (isValidate.statuscode != 1) {
       if (req.files && req.files.profile && req.files.profile[0].filename) {
         // if error remove file
@@ -159,6 +226,9 @@ const updateParty = async (req, res, next) => {
       }
       throw { message: isValidate.message }
     }
+
+    const partyData = await model.Party.findOne({ _id: req.body.partyId })
+
 
     // // add cuttingType with push old cuttingType (combine)
     // if (updateData["cuttingType"]) {
@@ -211,7 +281,11 @@ const updateParty = async (req, res, next) => {
         }
       })
 
-      await model.Loat.updateMany({ cuttingType:oldCutType.cutType, partyId:updateData.partyId},{ $set: { cuttingType:newCutType.cutType } })
+      console.log('oldCutType', oldCutType);
+
+      if(oldCutType && oldCutType.cutType) {
+        await model.Loat.updateMany({ cuttingType:oldCutType.cutType, partyId:updateData.partyId},{ $set: { cuttingType:newCutType.cutType } })
+      }
 
       updateData["cuttingType"] = [...cuttingTypeData,...partyData.cuttingType]
     }
@@ -226,6 +300,8 @@ const updateParty = async (req, res, next) => {
         helper.removeFile(profile, "PARTY", updateData.partyId)
       }
     }
+
+    console.log('updateData', updateData);
 
     const party = await model.Party.findByIdAndUpdate(
       // update party bodyData and get latest bodyData
@@ -1077,6 +1153,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
 
 export const PartyController = {
   getParty,
+  getAllDeletedParty,
   getSingleParty,
   addParty,
   updateParty,
