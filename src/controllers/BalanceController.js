@@ -1,7 +1,10 @@
 import moment from "moment"
+import mongoose from "mongoose"
 import helper, { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
 import BalanceSchema from "../validation/BalanceSchema"
+
+const ObjectId = mongoose.Types.ObjectId
 
 const getBalance = async (req, res, next) => {
   try {
@@ -65,8 +68,17 @@ const getBalancePartyWise = async (req, res, next) => {
                     mobile:{ $first:"$party.mobile" }
                 },
             },
-            totalBalance: {
+            totalBillAmount: {
                 $sum:"$billAmount"
+            },
+            totalPaidAmount: {
+                $sum:"$paidAmount"
+            },
+            totalRemainAmount: {
+                $sum:"$remainAmount"
+            },
+            totalAlloyAmount: {
+                $sum:"$alloyAmount"
             }
         }
       },
@@ -81,8 +93,17 @@ const getBalancePartyWise = async (req, res, next) => {
             dayWiseDetails: {
               $push: "$$ROOT"
             },
-            monthTotalBalance: {
-                $sum:"$totalBalance"
+            monthTotalBillAmount: { 
+                $first:"$totalBillAmount" 
+            },
+            monthTotalPaidAmount: {
+                $sum:"$totalPaidAmount"
+            },
+            monthTotalRemainAmount: {
+                $last:"$totalRemainAmount"
+            },
+            monthTotalAlloyAmount: {
+                $sum:"$totalAlloyAmount"
             }
         }
       },
@@ -92,9 +113,18 @@ const getBalancePartyWise = async (req, res, next) => {
               yearWiseDetails: {
                   $push: "$$ROOT"
               },
-              yearTotalBalance: {
-                $sum:"$monthTotalBalance"
-            }
+              yearTotalBillAmount: {
+                $sum:"$monthTotalBillAmount"
+              },
+              yearTotalPaidAmount: {
+                $sum:"$monthTotalPaidAmount"
+              },
+              yearTotalRemainAmount: {
+                $sum:"$monthTotalRemainAmount"
+              },
+              yearTotalAlloyAmount: {
+                $sum:"$monthTotalAlloyAmount"
+              }
           },
       },
   ])

@@ -20,39 +20,39 @@ const checkAddPartyInputValidate = (req) => {
     }
 
     // emailid
-    if ((Array.isArray(keys) && keys.includes("email")) || req.email == "") {
-      resolve(errorRes("Please Enter Email"))
-    } else {
-      if (keys.includes("email") && !isEmail(req.email)) {
-        resolve(errorRes("Please Enter Proper Email"))
-      } else if(keys.includes("email")){
-        const found = await model.Party.findOne({ email: req.email })
-        if (found) {
-          if(found.isDelete){
-            resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:found._id}))
-            return
-          }
-          resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:''}))
-        }
-      }
-    }
+    // if ((Array.isArray(keys) && keys.includes("email")) || req.email == "") {
+    //   resolve(errorRes("Please Enter Email"))
+    // } else {
+    //   if (keys.includes("email") && !isEmail(req.email)) {
+    //     resolve(errorRes("Please Enter Proper Email"))
+    //   } else if(keys.includes("email")){
+    //     const found = await model.Party.findOne({ email: req.email })
+    //     if (found) {
+    //       if(found.isDelete){
+    //         resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:found._id}))
+    //         return
+    //       }
+    //       resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:''}))
+    //     }
+    //   }
+    // }
     // mobile
-    if ((Array.isArray(keys) && !keys.includes("mobile")) || req.mobile == "") {
-      resolve(errorRes("Please Enter Mobile"))
-    } else {
-      if (!checkMobile(req.mobile)) {
-        resolve(errorRes("Please Enter Valid Mobile"))
-      } else {
-        const found = await model.Party.findOne({ mobile: req.mobile })
-        if (found) {
-          if(found.isDelete){
-            resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:found._id}))
-            return
-          }
-          resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:''}))
-        }
-      }
-    }
+    // if ((Array.isArray(keys) && !keys.includes("mobile")) || req.mobile == "") {
+    //   resolve(errorRes("Please Enter Mobile"))
+    // } else {
+    //   if (!checkMobile(req.mobile)) {
+    //     resolve(errorRes("Please Enter Valid Mobile"))
+    //   } else {
+    //     const found = await model.Party.findOne({ mobile: req.mobile })
+    //     if (found) {
+    //       if(found.isDelete){
+    //         resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:found._id}))
+    //         return
+    //       }
+    //       resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:''}))
+    //     }
+    //   }
+    // }
     // cuttingType
     if (
       (Array.isArray(keys) && !keys.includes("cuttingType")) ||
