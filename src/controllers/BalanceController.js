@@ -194,7 +194,11 @@ const updateBalance = async (req, res, next) => {
     }
 
     if (updateData.entryDate) {
-      updateData.entryDate = moment(updateData.entryDate).format('YYYY-MM-DD')
+      updateData.entryDate = await helper.formatDate(updateData.entryDate)
+    }
+
+    if (updateData.billDate) {
+      updateData.billDate = await helper.formatDate(updateData.billDate)
     }
 
     const balance = await model.Balance.findByIdAndUpdate(
