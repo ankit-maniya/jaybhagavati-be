@@ -47,7 +47,7 @@ const PartySchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      validate: [isEmail, "Please Enter Valid Email!"],
+      // validate: [isEmail, "Please Enter Valid Email!"],
     },
     cuttingType: {
       type: [
@@ -81,7 +81,7 @@ const PartySchema = new mongoose.Schema(
     mobile: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     isActive: {
         type: Boolean,
