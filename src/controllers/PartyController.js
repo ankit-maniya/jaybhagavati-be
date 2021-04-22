@@ -1151,6 +1151,442 @@ const getPartyLoatYearWise = async (req, res, next) => {
   }
 }
 
+const getAllPartyLoatYearWise = async (req, res, next) => {
+  try {
+    const { partyId } = req.params
+    const { _id } = req.user // login user bodyData
+    let query = [
+        { userId: _id },
+        { isDelete : false },
+        {
+            cuttingType:{
+                "$exists": true,
+                "$ne": null
+            }
+        }
+      ]
+
+    if (partyId) {
+      query = [ ...query, { partyId: ObjectId(partyId)}]
+    }
+
+    let loats = await model.Loat.aggregate([
+        {
+            $match :{
+                $and: query
+            }
+        },
+        {
+            $unwind: '$cuttingType'
+        },
+        {
+            $group : {
+                _id : { type: "$cuttingType", date : "$entryDate"},
+                loats: {
+                    $push: {
+                        type:"$cuttingType",
+                        numOfDimonds:"$numOfDimonds",
+                        loatWeight:"$loatWeight",
+                        loatPrice:"$loatPrice",
+                        multiWithDiamonds:"$multiWithDiamonds",
+                        price:{
+                            $cond: { if: { "$eq": [ "$multiWithDiamonds", true ] },
+                                then: { $round:[{ "$multiply": ["$numOfDimonds","$loatPrice"] }, 2] },
+                                else: { $round:[{ "$multiply": ["$loatWeight","$loatPrice"] }, 2] },
+                            }
+                        },
+                    },
+                }
+            },
+        },
+        {
+            $group : {
+                _id : "$_id.date",
+                typeWiseLoat: {
+                    $push: "$$ROOT"
+                },
+            },
+        },
+        {
+            $group : {
+                _id : { "month":{$month:"$_id"}, "year": {$year:"$_id"} },
+                monthWiseLoats: {
+                    $push: "$$ROOT"
+                },
+            },
+        },
+        {
+            $group : {
+                _id : "$_id.year",
+                yearWiseLoats: {
+                    $push: "$$ROOT"
+                },
+            },
+        },
+        {
+          $project: {
+            _id: 0,
+            year: "$_id",
+            yearWiseLoats:1
+          }
+        },
+        { $sort : { "year" : -1 } },
+    ])
+
+    let partyQuery = [ { userId: _id } ]
+    if (partyId) {
+          [
+            { _id: ObjectId(partyId)},
+            ...partyQuery
+          ]
+    }
+
+    let partys = await model.Party.aggregate([
+        {
+            $match :{
+                $and: partyQuery
+            }
+        },
+        {
+            $project: {
+                _id:1,
+                isActive : 1,
+                isDelete : 1,
+                mobile : 1,
+                name : 1,
+                billingName : 1,
+                userId:1,
+                balanceSheet: 1,
+                createdAt:1,
+                updatedAt: 1,
+                cuttingType : {
+                  $filter: {
+                  input: "$cuttingType",
+                  as: "item",
+                  cond: {$eq: ["$$item.isDelete", false]}
+                }
+              }
+            }
+        }
+      ])
+      
+
+    const partyLength = partys.length
+    let payment = []
+    if(partys && partyLength > 0) {
+    for(let py=0;py<partyLength;py++) {
+
+        let allTotal = {
+          TotalDimonds: 0,
+          TotalWeight: 0,
+          TotalAmount: 0,
+          TotalDiamondWiseCount: 0,
+          TotalDiamondWiseWeight: 0,
+          TotalDiamondWiseAmount: 0,
+          TotalWeightWiseCount: 0,
+          TotalWeightWiseWeight: 0,
+          TotalWeightWiseAmount: 0,
+          paymentDetails:[]
+        }
+        
+        const partyDetail = partys[py].cuttingType || []
+
+        if (partyDetail && partyDetail.length > 0) {
+            partyDetail.map((type) => {
+                allTotal.paymentDetails.push(
+                    {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Total Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Total Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                    {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
+                )
+            })
+        }
+
+        const yearLoats = loats
+        const totalYearLength = loats.length
+        if (yearLoats && totalYearLength > 0) {
+          for (let year=0; year<totalYearLength; year++) {
+
+            const yearWiseLoats = yearLoats[year].yearWiseLoats
+            const totalMonthLength = yearLoats[year].yearWiseLoats.length
+
+            let yearWiseTotal = {
+              TotalDimonds: 0,
+              TotalWeight: 0,
+              TotalAmount: 0,
+              TotalDiamondWiseCount: 0,
+              TotalDiamondWiseWeight: 0,
+              TotalDiamondWiseAmount: 0,
+              TotalWeightWiseCount: 0,
+              TotalWeightWiseWeight: 0,
+              TotalWeightWiseAmount: 0,
+              paymentDetails:[]
+            }
+
+            partyDetail.map((type) => {
+              yearWiseTotal.paymentDetails.push(
+                  {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Total Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+                  {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
+              )
+            })
+            if (yearWiseLoats && totalMonthLength > 0) {
+              for (let month=0; month<totalMonthLength; month++) {
+                  
+                const totalLoatLength = yearWiseLoats[month].monthWiseLoats.length
+                const dateWiseLoats = yearWiseLoats[month].monthWiseLoats
+
+                let monthWiseTotal = {
+                  TotalDimonds: 0,
+                  TotalWeight: 0,
+                  TotalAmount: 0,
+                  TotalDiamondWiseCount: 0,
+                  TotalDiamondWiseWeight: 0,
+                  TotalDiamondWiseAmount: 0,
+                  TotalWeightWiseCount: 0,
+                  TotalWeightWiseWeight: 0,
+                  TotalWeightWiseAmount: 0,
+                  paymentDetails:[]
+                }
+
+                partyDetail.map((type) => {
+                  monthWiseTotal.paymentDetails.push(
+                      {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Total Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Total Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                      {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                  )
+                })
+
+                if (dateWiseLoats && totalLoatLength > 0) {
+                  for (let date=0; date<totalLoatLength; date++) {
+
+                    const totalTypeWiseLoatLength = dateWiseLoats[date].typeWiseLoat.length
+                    const tLoat = dateWiseLoats[date].typeWiseLoat
+                    let typeWiseTotal = {
+                        loatsPrices:0,
+                        loatsCaret:0
+                    }
+
+                    let dayWiseTotal = {
+                        TotalDimonds: 0,
+                        TotalWeight: 0,
+                        TotalAmount: 0,
+                        TotalDiamondWiseCount: 0,
+                        TotalDiamondWiseWeight: 0,
+                        TotalDiamondWiseAmount: 0,
+                        TotalWeightWiseCount: 0,
+                        TotalWeightWiseWeight: 0,
+                        TotalWeightWiseAmount: 0,
+                        paymentDetails:[]
+                    }
+
+                    partyDetail.map((type) => {
+                        dayWiseTotal.paymentDetails.push(
+                            {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Total Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Total Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                            {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
+                        )
+                    })
+
+                    if (totalTypeWiseLoatLength > 0) {
+                      for (let j=0; j<totalTypeWiseLoatLength; j++) {
+
+                        const index1 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Diamonds (${tLoat[j]._id.type})`)
+                        const index2 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Weight (${tLoat[j]._id.type})`)
+                        const index3 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Total Amount (${tLoat[j]._id.type})`)
+                        const index4 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Count (${tLoat[j]._id.type})`)
+                        const index5 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Weight (${tLoat[j]._id.type})`)
+                        const index6 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Diamond Wise Amount (${tLoat[j]._id.type})`)
+                        const index7 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Diamond (${tLoat[j]._id.type})`)
+                        const index8 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Weight (${tLoat[j]._id.type})`)
+                        const index9 = dayWiseTotal.paymentDetails.findIndex((d) => d.key === `Weight Wise Amount (${tLoat[j]._id.type})`)
+                        const loatsLength = tLoat[j].loats.length
+                        const allLoats = tLoat[j].loats
+
+                        if ((index4 !== -1 || index7 !== -1) && loatsLength > 0) {
+
+                          for (let k=0; k<loatsLength; k++) {
+                            if (allLoats[k].multiWithDiamonds) {
+                              if (index4 !== -1) {
+                                allTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                allTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                allTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                allTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                                allTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                                allTotal.paymentDetails[index6].value += allLoats[k].price
+
+                                allTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                allTotal.TotalWeight += allLoats[k].loatWeight
+                                allTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
+                                allTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
+                                allTotal.TotalDiamondWiseAmount += allLoats[k].price
+                                allTotal.TotalAmount += allLoats[k].price
+
+                                yearWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                yearWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                yearWiseTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                yearWiseTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                                yearWiseTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                                yearWiseTotal.paymentDetails[index6].value += allLoats[k].price
+
+                                yearWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                yearWiseTotal.TotalWeight += allLoats[k].loatWeight
+                                yearWiseTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
+                                yearWiseTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
+                                yearWiseTotal.TotalDiamondWiseAmount += allLoats[k].price
+                                yearWiseTotal.TotalAmount += allLoats[k].price
+
+                                monthWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                monthWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                monthWiseTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                monthWiseTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                                monthWiseTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                                monthWiseTotal.paymentDetails[index6].value += allLoats[k].price
+
+                                monthWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                monthWiseTotal.TotalWeight += allLoats[k].loatWeight
+                                monthWiseTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
+                                monthWiseTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
+                                monthWiseTotal.TotalDiamondWiseAmount += allLoats[k].price
+                                monthWiseTotal.TotalAmount += allLoats[k].price
+
+                                dayWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                dayWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                dayWiseTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                dayWiseTotal.paymentDetails[index4].value += allLoats[k].numOfDimonds
+                                dayWiseTotal.paymentDetails[index5].value += allLoats[k].loatWeight
+                                dayWiseTotal.paymentDetails[index6].value += allLoats[k].price
+
+                                dayWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                dayWiseTotal.TotalWeight += allLoats[k].loatWeight
+                                dayWiseTotal.TotalDiamondWiseCount += allLoats[k].numOfDimonds
+                                dayWiseTotal.TotalDiamondWiseWeight += allLoats[k].loatWeight
+                                dayWiseTotal.TotalDiamondWiseAmount += allLoats[k].price
+                                dayWiseTotal.TotalAmount += allLoats[k].price
+
+                                typeWiseTotal.loatsDiamondsWisePrice += allLoats[k].price
+                                typeWiseTotal.loatsCaret += allLoats[k].loatWeight
+                              }
+                            } else {
+                              if (index7 !== -1) {
+                                allTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                allTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                allTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                allTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                                allTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                                allTotal.paymentDetails[index9].value += allLoats[k].price
+
+                                allTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                allTotal.TotalWeight += allLoats[k].loatWeight
+                                allTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                                allTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                                allTotal.TotalWeightWiseAmount += allLoats[k].price
+                                allTotal.TotalAmount += allLoats[k].price
+
+                                yearWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                yearWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                yearWiseTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                yearWiseTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                                yearWiseTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                                yearWiseTotal.paymentDetails[index9].value += allLoats[k].price
+
+                                yearWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                yearWiseTotal.TotalWeight += allLoats[k].loatWeight
+                                yearWiseTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                                yearWiseTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                                yearWiseTotal.TotalWeightWiseAmount += allLoats[k].price
+                                yearWiseTotal.TotalAmount += allLoats[k].price
+
+                                monthWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                monthWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                monthWiseTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                monthWiseTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                                monthWiseTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                                monthWiseTotal.paymentDetails[index9].value += allLoats[k].price
+
+                                monthWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                monthWiseTotal.TotalWeight += allLoats[k].loatWeight
+                                monthWiseTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                                monthWiseTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                                monthWiseTotal.TotalWeightWiseAmount += allLoats[k].price
+                                monthWiseTotal.TotalAmount += allLoats[k].price
+
+                                dayWiseTotal.paymentDetails[index1].value += allLoats[k].numOfDimonds
+                                dayWiseTotal.paymentDetails[index2].value += allLoats[k].loatWeight
+                                dayWiseTotal.paymentDetails[index3].value += allLoats[k].price
+
+                                dayWiseTotal.paymentDetails[index7].value += allLoats[k].numOfDimonds
+                                dayWiseTotal.paymentDetails[index8].value += allLoats[k].loatWeight
+                                dayWiseTotal.paymentDetails[index9].value += allLoats[k].price
+
+                                dayWiseTotal.TotalDimonds += allLoats[k].numOfDimonds
+                                dayWiseTotal.TotalWeight += allLoats[k].loatWeight
+                                dayWiseTotal.TotalWeightWiseCount += allLoats[k].numOfDimonds
+                                dayWiseTotal.TotalWeightWiseWeight += allLoats[k].loatWeight
+                                dayWiseTotal.TotalWeightWiseAmount += allLoats[k].price
+                                dayWiseTotal.TotalAmount += allLoats[k].price
+
+                                typeWiseTotal.loatsPrices += allLoats[k].price
+                                typeWiseTotal.loatsCaret += allLoats[k].loatWeight
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+
+                    dateWiseLoats[date].dayWiseTotal = dayWiseTotal
+                  }
+                }
+                
+                yearWiseLoats[month].monthWiseTotal = monthWiseTotal
+              }
+            }
+            
+            yearLoats[year].yearWiseTotal = yearWiseTotal
+          }
+        }
+
+        payment[py] = { party:partys[py], loats, allTotal}
+      }
+    }
+
+    res.send(successRes(payment)) // get success response
+  } catch (error) {
+    res.send(errorRes(error.message)) // get error response
+  }
+}
+
 export const PartyController = {
   getParty,
   getAllDeletedParty,
@@ -1159,6 +1595,7 @@ export const PartyController = {
   updateParty,
   getPartyLoatDateWise,
   getPartyLoatYearWise,
+  getAllPartyLoatYearWise,
   getAllPartyLoatsDateWise,
   getAllEntryDate
 }
