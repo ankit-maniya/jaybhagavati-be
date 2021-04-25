@@ -1,5 +1,5 @@
 import moment from "moment"
-import helper, { errorRes, successRes } from "../functions/helper"
+import helper, { errorRes, successMessage, successRes } from "../functions/helper"
 import { model } from "../models"
 import LoatSchema from "../validation/LoatSchema"
 
@@ -112,9 +112,35 @@ const updateLoat = async (req, res, next) => {
   }
 }
 
+const deleteMany = async (req, res, next) => {
+  try {
+
+    const { _id } = req.user // login user bodyData
+    let { deleteMany } = req.body
+
+    if(deleteMany && deleteMany.length === 0) {
+        throw { message: 'Invalid array Data passed'}
+    }
+  
+    await model.Loat.updateMany(
+      // update loat bodyData and get latest bodyData
+      { _id: { $in: deleteMany }, userId:_id },
+      {
+        $set: { isDelete: true },
+      },
+      { new: true }
+    )
+
+    res.send(successMessage("deleted successfully data")) // get success response
+  } catch (error) {
+    res.send(errorRes(error.message)) // get error response
+  }
+}
+
 
 export const LoatController = {
   getLoat,
   addLoat,
-  updateLoat
+  updateLoat,
+  deleteMany,
 }

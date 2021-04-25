@@ -1313,7 +1313,14 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                       }
 
                       if (existMonth !== -1 && existYear !== -1) {
-                        partyDetails[existParty].payment[existYear].details[existMonth].loat.push({...{ type:typeWiseLoat[typeLoat].loats[0].type}, ...{loats:typeWiseLoat[typeLoat].loats}})
+ 
+                        const findLoatsIndex = partyDetails[existParty].payment[existYear].details[existMonth].loat.findIndex((d) => d.type === typeWiseLoat[typeLoat].loats[0].type)
+                        if(findLoatsIndex !== -1){
+                          console.log("ypeWiseLoat[typeLoat].loats[0].type", { ...typeWiseLoat[typeLoat].loats });
+                          partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats.push({ ...typeWiseLoat[typeLoat].loats }) 
+                        } else {
+                          partyDetails[existParty].payment[existYear].details[existMonth].loat.push({...{ type:typeWiseLoat[typeLoat].loats[0].type}, ...{loats:typeWiseLoat[typeLoat].loats}})
+                        }
                       } else {
                         if(existYear !== -1) {
                           if (existMonth === -1) {
@@ -1566,6 +1573,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
     //END NEW IMPLEMENTATION:
   }
 
+    let newPartyDetails = []
     yearLoats = loats
     totalYearLength = loats.length
     if (yearLoats && totalYearLength > 0) {
@@ -1576,31 +1584,58 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
           for (let month=0; month<totalMonthLength; month++) {
             yearWiseLoats[month].monthWiseLoats = []
 
+
             partyDetails.forEach((party, i) => {
               delete party.cuttingType
-              if(party.loatHaveMonth.includes(yearWiseLoats[month]._id.month)){
-                // console.log(party);
-                party.payment.forEach((payment) => {
-                    // let indexFound = payment.details.findIndex((d) => d.loatMonth === yearWiseLoats[month]._id.month)
-                    // if (indexFound !== -1) {
-                      let paymentDetails = payment.details.filter(d => d.loatMonth === yearWiseLoats[month]._id.month)
 
-                      party.payment.details = paymentDetails
-                    // }
+              party.newObjectPayment = []
+
+              console.log('yearWiseLoats[month]._id.month', yearWiseLoats[month]._id.month);
+
+              if(party.loatHaveMonth.includes(yearWiseLoats[month]._id.month)){
+                party.payment.forEach((pay) => {
+                  console.log('yearWiseLoats[month]._id.month-=-=match', yearWiseLoats[month]._id.month);
+                  let paymentDetails = pay.details.filter(d => { console.log( d.loatMonth , yearWiseLoats[month]._id.month, d.loatMonth === yearWiseLoats[month]._id.month) 
+                    return d.loatMonth === yearWiseLoats[month]._id.month })
+
+                  console.log("----------AFTER----------");
+                  console.log(paymentDetails[0].loatMonth, yearWiseLoats[month]._id.month);
+                  console.log(paymentDetails);
+                  if(paymentDetails.length > 0 && paymentDetails[0].loatMonth === yearWiseLoats[month]._id.month){
+                    console.log('montt----',JSON.stringify(paymentDetails[0].loatMonth));
+                    party.newObjectPayment = [ { ...{ loatYear: pay.loatYear }, ...{ details: paymentDetails } }]
                     yearLoats[year].yearWiseLoats[month].monthWiseLoats.push(party)
+                  }
                 })
               }
             })
-
-            // console.log('yearWiseLoats', yearWiseLoats);
           }
         }
       }
     }
 
-    
+    // yearLoats = loats
+    // totalYearLength = loats.length
+    // if (yearLoats && totalYearLength > 0) {
+    //   for (let year=0; year<totalYearLength; year++) {
+    //     const yearWiseLoats = yearLoats[year].yearWiseLoats
+    //     const totalMonthLength = yearLoats[year].yearWiseLoats.length
+    //     if (yearWiseLoats && totalMonthLength > 0) {
+    //     for (let month=0; month<totalMonthLength; month++) {
+    //         yearLoats[year].yearWiseLoats[month].monthWiseLoats.filter((obj,i) => {
+    //           if(obj.hasOwnProperty('payment')) {
+    //               delete obj.payment
+    //               return obj;
+    //           }
+    //         })
+    //       }
+    //     }
+    //   }
+    // }
 
-    res.send(successRes(yearLoats)) // get success response
+    console.log('called');
+
+    res.send(successRes(partyDetails)) // get success response
   } catch (error) {
     console.log('error', error);
     res.send(errorRes(error.message)) // get error response
