@@ -7,35 +7,39 @@ const PartySchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique:true,
     },
     billingName: {
       type: String,
       required: true,
       unique:true,
     },
+    openingBalance: {
+      type: Number,
+      default: 0,
+    },
     balanceSheet: [{
-        _id:false,
-        oldBalance: {
-          type:Number,
-          default:0
-        },
-        date: {
-          type:String,
-        },
-        deductionAmount: {
-          type:Number,
-          default:0
-        },
-        remainBalance: {
-          type:Number,
-          default:0
-        },
-        alloyAmount: {
-          type:Number,
-          default:0
-        },
-      }],
+      _id:false,
+      oldBalance: {
+        type:Number,
+        default:0
+      },
+      date: {
+        type:String,
+      },
+      deductionAmount: {
+        type:Number,
+        default:0
+      },
+      remainBalance: {
+        type:Number,
+        default:0
+      },
+      alloyAmount: {
+        type:Number,
+        default:0
+      },
+    }],
+    // newBalanceSheet: [{}],   
     userId: {
       type: ObjectId,
       required: true,
@@ -43,7 +47,7 @@ const PartySchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      validate: [isEmail, "Please Enter Valid Email!"],
+      // validate: [isEmail, "Please Enter Valid Email!"],
     },
     cuttingType: {
       type: [
@@ -77,7 +81,7 @@ const PartySchema = new mongoose.Schema(
     mobile: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     isActive: {
         type: Boolean,

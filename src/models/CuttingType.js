@@ -20,6 +20,10 @@ const CuttingTypeSchema = new mongoose.Schema(
       type:Boolean,
       default:false
     },
+    colorCode: {
+      type:String,
+      default:"0xff094086"
+    },
     isActive: {
         type: Boolean,
         default: 1,

@@ -13,9 +13,9 @@ const getLoat = async (req, res, next) => {
     }
     const options = {
       page: page || 1,
-      limit: limit || 10,
+      limit: limit || 400000,
       populate: 'partyId',
-      sort: {createdAt : -1}
+      sort: {createdAt : 1}
     }
 
     if (partyId) {

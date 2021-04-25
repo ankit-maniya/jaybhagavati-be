@@ -77,9 +77,9 @@ const updateUser = async (req, res, next) => {
   try {
     await uploadFileToStorage(req, res) // upload file using multer as a middle ware
     const { _id, profile } = req.user // login user bodyData
-    const updateData = JSON.parse(JSON.stringify(req.body)) // remove unusual [obj]
+    const updateData = req.body // remove unusual [obj]
     // update edited time
-    bodyData["updatedAt"] = new Date()
+    updateData["updatedAt"] = new Date()
     const isValidate = await Userschema.checkUpdateUserInputValidate(
       updateData,
       _id

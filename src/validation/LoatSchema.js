@@ -66,23 +66,23 @@ const checkUpdateLoatInputValidate = (req, LoginId) => {
       resolve(errorRes("Please Enter A cutting Type"))
     }
 
-    // isActive
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isActive") &&
-      ![0, 1].includes(req.isActive)
-    ) {
-      resolve(errorRes("Please Enter isActive type!"))
-    }
+    // // isActive
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isActive") &&
+    //   ![0, 1].includes(req.isActive)
+    // ) {
+    //   resolve(errorRes("Please Enter isActive type!"))
+    // }
 
-    // isDelete
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isDelete") &&
-      ![0, 1].includes(req.isDelete)
-    ) {
-      resolve(errorRes("Please Enter Proper isDelete type!"))
-    }
+    // // isDelete
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isDelete") &&
+    //   ![0, 1].includes(req.isDelete)
+    // ) {
+    //   resolve(errorRes("Please Enter Proper isDelete type!"))
+    // }
 
     resolve(successMessage("valid data"))
   })

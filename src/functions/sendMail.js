@@ -31,7 +31,6 @@ const forgotPasswordByMail = async (userEmailId, Otp) => {
                 if (err) {
                     reject(err)
                 } else {
-                    console.log('info', info)
                     resolve(info)
                 }
             })

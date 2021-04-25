@@ -20,31 +20,39 @@ const checkAddPartyInputValidate = (req) => {
     }
 
     // emailid
-    if ((Array.isArray(keys) && keys.includes("email")) || req.email == "") {
-      resolve(errorRes("Please Enter Email"))
-    } else {
-      if (keys.includes("email") && !isEmail(req.email)) {
-        resolve(errorRes("Please Enter Proper Email"))
-      } else if(keys.includes("email")){
-        const found = await model.Party.findOne({ email: req.email })
-        if (found) {
-          resolve(errorRes("Email is Alredy Register! Use Diffrent Email!"))
-        }
-      }
-    }
+    // if ((Array.isArray(keys) && keys.includes("email")) || req.email == "") {
+    //   resolve(errorRes("Please Enter Email"))
+    // } else {
+    //   if (keys.includes("email") && !isEmail(req.email)) {
+    //     resolve(errorRes("Please Enter Proper Email"))
+    //   } else if(keys.includes("email")){
+    //     const found = await model.Party.findOne({ email: req.email })
+    //     if (found) {
+    //       if(found.isDelete){
+    //         resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:found._id}))
+    //         return
+    //       }
+    //       resolve(errorRes({msg:"Email is Alredy Register! Use Diffrent Email!",partyId:''}))
+    //     }
+    //   }
+    // }
     // mobile
-    if ((Array.isArray(keys) && !keys.includes("mobile")) || req.mobile == "") {
-      resolve(errorRes("Please Enter Mobile"))
-    } else {
-      if (!checkMobile(req.mobile)) {
-        resolve(errorRes("Please Enter Valid Mobile"))
-      } else {
-        const found = await model.Party.findOne({ mobile: req.mobile })
-        if (found) {
-          resolve(errorRes("Mobile is Alredy Register! Use Diffrent Mobile!"))
-        }
-      }
-    }
+    // if ((Array.isArray(keys) && !keys.includes("mobile")) || req.mobile == "") {
+    //   resolve(errorRes("Please Enter Mobile"))
+    // } else {
+    //   if (!checkMobile(req.mobile)) {
+    //     resolve(errorRes("Please Enter Valid Mobile"))
+    //   } else {
+    //     const found = await model.Party.findOne({ mobile: req.mobile })
+    //     if (found) {
+    //       if(found.isDelete){
+    //         resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:found._id}))
+    //         return
+    //       }
+    //       resolve(errorRes({msg:"Mobile is Alredy Register! Use Diffrent Mobile!",partyId:''}))
+    //     }
+    //   }
+    // }
     // cuttingType
     if (
       (Array.isArray(keys) && !keys.includes("cuttingType")) ||
@@ -58,8 +66,9 @@ const checkAddPartyInputValidate = (req) => {
 
         const cutType = cuttType.cutType
         const price = cuttType.price
+        const typeId = cuttType.typeId
 
-        if (cutType == "" || price == "" )
+        if (cutType == "" || price == "" || typeId == "")
           resolve(errorRes("Please Enter a Cutting Type"))
       })
     }
@@ -97,22 +106,22 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
       resolve(errorRes("Please Enter A billingName"))
     }
 
-    // cuttingType
-    if (Array.isArray(keys) && keys.includes("cuttingType") && req.cuttingType == []) {
-      resolve(errorRes("Please Enter A Cutting Type And It will be Array"))
-    } else {
-      if (keys.includes("cuttingType") && req.cuttingType != []) {
+    // // cuttingType
+    // if (Array.isArray(keys) && keys.includes("cuttingType") && req.cuttingType == []) {
+    //   resolve(errorRes("Please Enter A Cutting Type And It will be Array"))
+    // } else {
+    //   if (keys.includes("cuttingType") && req.cuttingType != []) {
 
-        req.cuttingType.map((cuttType) => {
+    //     req.cuttingType.map((cuttType) => {
 
-          const cutType = cuttType.cutType
-          const price = cuttType.price
+    //       const cutType = cuttType.cutType
+    //       const price = cuttType.price
 
-          if (cutType == "" || price == "" )
-            resolve(errorRes("Please Enter a Cutting Type"))
-        })
-      }
-    }
+    //       if (cutType == "" || price == "" )
+    //         resolve(errorRes("Please Enter a Cutting Type"))
+    //     })
+    //   }
+    // }
 
     // mobile
     if (Array.isArray(keys) && keys.includes("mobile") && req.mobile == "") {
@@ -134,23 +143,23 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
       }
     }
 
-    // isActive
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isActive") &&
-      ![0, 1].includes(req.isActive)
-    ) {
-      resolve(errorRes("Please Enter isActive type!"))
-    }
+    // // isActive
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isActive") &&
+    //   ![0, 1].includes(req.isActive)
+    // ) {
+    //   resolve(errorRes("Please Enter isActive type!"))
+    // }
 
-    // isDelete
-    if (
-      Array.isArray(keys) &&
-      keys.includes("isDelete") &&
-      ![0, 1].includes(req.isDelete)
-    ) {
-      resolve(errorRes("Please Enter Proper isDelete type!"))
-    }
+    // // isDelete
+    // if (
+    //   Array.isArray(keys) &&
+    //   keys.includes("isDelete") &&
+    //   ![0, 1].includes(req.isDelete)
+    // ) {
+    //   resolve(errorRes("Please Enter Proper isDelete type!"))
+    // }
 
     resolve(successMessage("valid data"))
   })
