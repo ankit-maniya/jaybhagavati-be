@@ -785,6 +785,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
                 },
             },
         },
+        { $sort : { "_id" : 1 } },
         {
             $group : {
                 _id : { "month":{$month:"$_id"}, "year": {$year:"$_id"} },
@@ -793,6 +794,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
                 },
             },
         },
+        { $sort : { "_id.month" : 1 } },
         {
             $group : {
                 _id : "$_id.year",
