@@ -1233,6 +1233,23 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
         { $sort : { "year" : -1 } },
     ])
 
+    function removeJSONString(obj, deleteKey) {
+      // store all keys of this object for later use
+      let keys = Object.keys(obj);
+      // for each key update the "json" key
+      keys.map(key => {
+        // updates only if it has "json"
+        if (obj[key].hasOwnProperty(deleteKey)) {
+          // assign the current obj a new field with "json" value pair
+          Object.assign(obj[key], obj[key][deleteKey]);
+          // delete "json" key from this object
+          delete obj[key][deleteKey];
+        }
+      })
+      // updated all fields of obj
+      return obj;
+    }
+
     let partyDetails = []
     let yearLoats = loats
     let totalYearLength = loats.length
@@ -1286,7 +1303,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
 
                   if (exist === -1) {
                     cloneParty.payment = []
-                    partyDetails.push({...cloneParty,...{ loatHaveMonth:[]}})
+                    partyDetails.push({...cloneParty,...{ loatHaveMonth:[]}, ...{ loatHaveYear:[]}})
                   }
                 }
 
@@ -1307,6 +1324,10 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                       if(!partyDetails[existParty].loatHaveMonth.includes(loatMonth)){
                         partyDetails[existParty].loatHaveMonth.push(loatMonth)
                       }
+
+                      if(!partyDetails[existParty].loatHaveYear.includes(loatYear)){
+                        partyDetails[existParty].loatHaveYear.push(loatYear)
+                      }
                       
                       const existYear = partyDetails[existParty].payment.findIndex((d) => d.loatYear === loatYear)
                       let existMonth = -1
@@ -1318,8 +1339,12 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
  
                         const findLoatsIndex = partyDetails[existParty].payment[existYear].details[existMonth].loat.findIndex((d) => d.type === typeWiseLoat[typeLoat].loats[0].type)
                         if(findLoatsIndex !== -1){
-                          console.log("ypeWiseLoat[typeLoat].loats[0].type", { ...typeWiseLoat[typeLoat].loats });
                           partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats.push({ ...typeWiseLoat[typeLoat].loats }) 
+                          removeJSONString(partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats, "0")
+                          removeJSONString(partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats, "1")
+                          removeJSONString(partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats, "2")
+                          removeJSONString(partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats, "3")
+                          removeJSONString(partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats, "4")
                         } else {
                           partyDetails[existParty].payment[existYear].details[existMonth].loat.push({...{ type:typeWiseLoat[typeLoat].loats[0].type}, ...{loats:typeWiseLoat[typeLoat].loats}})
                         }
@@ -1332,7 +1357,9 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                           partyDetails[existParty].payment.push({ loatYear, details:[{ loatMonth, loat: [ { ...{ type:typeWiseLoat[typeLoat].loats[0].type}, ...{loats:typeWiseLoat[typeLoat].loats }}]}]})
                         }
                       }
+
                     }
+
                   }
                 }
               }
@@ -1340,6 +1367,8 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
         }
       }
     }
+
+    
 
     // START NEW IMPLEMENTATION:
     const totalPartyLength = partyDetails.length
@@ -1587,26 +1616,45 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
             yearWiseLoats[month].monthWiseLoats = []
 
 
-            partyDetails.forEach((party, i) => {
+            partyDetails.forEach((party) => {
               delete party.cuttingType
+              const partyDetails = { 
+                partyId: party._id,
+                name: party.name,
+                billingName: party.billingName,
+              }
 
               party.newObjectPayment = []
 
-              console.log('yearWiseLoats[month]._id.month', yearWiseLoats[month]._id.month);
+              if (party.loatHaveMonth.includes(yearWiseLoats[month]._id.month)) {
+                party.payment.forEach((pay, paymentIndex) => {
 
-              if(party.loatHaveMonth.includes(yearWiseLoats[month]._id.month)){
-                party.payment.forEach((pay) => {
-                  console.log('yearWiseLoats[month]._id.month-=-=match', yearWiseLoats[month]._id.month);
-                  let paymentDetails = pay.details.filter(d => { console.log( d.loatMonth , yearWiseLoats[month]._id.month, d.loatMonth === yearWiseLoats[month]._id.month) 
-                    return d.loatMonth === yearWiseLoats[month]._id.month })
+                  if (party.loatHaveYear.includes(pay.loatYear)) {
+                    const yearIndex = newPartyDetails.findIndex((d) => d.year === pay.loatYear)
 
-                  console.log("----------AFTER----------");
-                  console.log(paymentDetails[0].loatMonth, yearWiseLoats[month]._id.month);
-                  console.log(paymentDetails);
-                  if(paymentDetails.length > 0 && paymentDetails[0].loatMonth === yearWiseLoats[month]._id.month){
-                    console.log('montt----',JSON.stringify(paymentDetails[0].loatMonth));
-                    party.newObjectPayment = [ { ...{ loatYear: pay.loatYear }, ...{ details: paymentDetails } }]
-                    yearLoats[year].yearWiseLoats[month].monthWiseLoats.push(party)
+                    // console.log('findIndexLoatYear', findIndexLoatYear);
+                    if (yearIndex === -1) {
+                      newPartyDetails.push({ ...{ year: pay.loatYear }, ...{ details: [{ month: pay.details[0].loatMonth, ...{ details: [{ ...partyDetails, monthWiseTotal: pay.details[0].monthWiseTotal }] } }] } })
+                    } else {
+                        const oldMonthIndex = pay.details.findIndex((d) => d.loatMonth === pay.loatMonth)
+                        const monthIndex = newPartyDetails[yearIndex].details.findIndex((d) => d.loatMonth === pay.details[oldMonthIndex].loatMonth)
+
+                        if(monthIndex === -1) {
+                          newPartyDetails[yearIndex].details.push({ month: pay.details[0].loatMonth, ...{ details: [{ ...partyDetails, monthWiseTotal: pay.details[0].monthWiseTotal }] } })
+                        } else {
+                          newPartyDetails[yearIndex].details[monthIndex].push()
+                        }
+                    }
+
+                    // let paymentDetails = pay.details.filter(d => { console.log( d.loatMonth , yearWiseLoats[month]._id.month, d.loatMonth === yearWiseLoats[month]._id.month) 
+                    //   return d.loatMonth === yearWiseLoats[month]._id.month })
+  
+                    // console.log(paymentDetails[0].loatMonth, yearWiseLoats[month]._id.month);
+                    // console.log(paymentDetails);
+                    // if(paymentDetails.length > 0 && paymentDetails[0].loatMonth === yearWiseLoats[month]._id.month){
+                    //   party.newObjectPayment = [ { ...{ loatYear: pay.loatYear }, ...{ details: paymentDetails } }]
+                    //   yearLoats[year].yearWiseLoats[month].monthWiseLoats.push(party)
+                    // }
                   }
                 })
               }
@@ -1616,28 +1664,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
       }
     }
 
-    // yearLoats = loats
-    // totalYearLength = loats.length
-    // if (yearLoats && totalYearLength > 0) {
-    //   for (let year=0; year<totalYearLength; year++) {
-    //     const yearWiseLoats = yearLoats[year].yearWiseLoats
-    //     const totalMonthLength = yearLoats[year].yearWiseLoats.length
-    //     if (yearWiseLoats && totalMonthLength > 0) {
-    //     for (let month=0; month<totalMonthLength; month++) {
-    //         yearLoats[year].yearWiseLoats[month].monthWiseLoats.filter((obj,i) => {
-    //           if(obj.hasOwnProperty('payment')) {
-    //               delete obj.payment
-    //               return obj;
-    //           }
-    //         })
-    //       }
-    //     }
-    //   }
-    // }
-
-    console.log('called');
-
-    res.send(successRes(partyDetails)) // get success response
+    res.send(successRes(newPartyDetails)) // get success response
   } catch (error) {
     console.log('error', error);
     res.send(errorRes(error.message)) // get error response
