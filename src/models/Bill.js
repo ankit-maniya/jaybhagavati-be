@@ -36,7 +36,7 @@ const BillSchema = new mongoose.Schema(
         enum: [0, 1] //0 = Not Deleted, 1 = Deleted
     }
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 )
 
 BillSchema.plugin(mongoosePaginate)

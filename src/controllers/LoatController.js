@@ -47,16 +47,23 @@ const addLoat = async (req, res, next) => {
 
     for (let i=0; i<totalLength; i++) {
       loats[i].userId = _id
+      if(!loats[i].cutId) {
+      }
       
       if (!loats[i].entryDate) {
         loats[i].entryDate = await helper.formatDate(new Date())
+        loats[i].month = await helper.getMonth(new Date())
+        loats[i].year = await helper.getYear(new Date())
         bodyData.push(loats[i])
       } else {
+        const date = loats[i].entryDate
         loats[i].entryDate = await helper.formatDate(loats[i].entryDate)
+        loats[i].month = await helper.getMonth(date) + 1
+        loats[i].year = await helper.getYear(date)
         bodyData.push(loats[i])
       }
     }
-    
+
     // const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
 
     // if (isValidate.statuscode != 1) {

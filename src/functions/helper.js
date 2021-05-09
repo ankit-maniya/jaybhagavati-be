@@ -308,6 +308,18 @@ const formatDate = (date) => {
   return `${moment(moment(date, 'DD-MM-YYYY')).format('YYYY-MM-DD')}T05:30:00.000+05:30`
 }
 
+const getMonth = (date) => {
+  return moment(moment(date, 'DD-MM-YYYY')).month()
+}
+
+const getYear = (date) => {
+  return moment(moment(date, 'DD-MM-YYYY')).year()
+}
+
+const getDay = (date) => {
+  return moment(moment(date, 'DD-MM-YYYY')).day()
+}
+
 const helper = {
     removeFile,
     moveFile,
@@ -318,7 +330,9 @@ const helper = {
     moveItemFile,
     removeItemFile,
     getRandomNumber,
-    formatDate
+    formatDate,
+    getMonth,
+    getYear
 }
 
 export { errorRes, successRes, successMessage, errorMessage }

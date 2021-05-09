@@ -47,7 +47,7 @@ const BalanceSchema = new mongoose.Schema(
         default: false,
     }
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 )
 
 const Balance = mongoose.model("Balance", BalanceSchema)
