@@ -36,7 +36,7 @@ const updateFunction = async (req, res, next) => {
               loats[k].cutId = cuttTypes[j]._id
   
               const loat = await updateLoat(loatId, loats[k])
-              console.log('=-------loat-updated---===-=', loat);
+              // console.log('=-------loat-updated---===-=', loat);
             }
             // console.log('=-----------===-=', loats);
           }

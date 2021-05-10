@@ -1176,7 +1176,6 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
       query.push({ year: parseInt(searchYear) },{ month: parseInt(searchMonth) })
     }
 
-    console.log('query', query);
     let loats = await model.Loat.aggregate([
         {
             $match :{
