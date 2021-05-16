@@ -47,8 +47,9 @@ const addLoat = async (req, res, next) => {
 
     for (let i=0; i<totalLength; i++) {
       loats[i].userId = _id
-      if(!loats[i].cutId) {
-      }
+      // if (!loats[i].cutId) {
+      //   throw { message: 'Invalid cutId Passed'}
+      // }
       
       if (!loats[i].entryDate) {
         loats[i].entryDate = await helper.formatDate(new Date())

@@ -1313,6 +1313,8 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                     cloneParty.payment = []
                     partyDetails.push({...cloneParty,...{ loatHaveMonth:[]}, ...{ loatHaveYear:[]}})
                   }
+
+                  partyDetails = _.sortBy(partyDetails, 'name', 'asc');
                 }
 
                 const totalLoatEntryLength = dateWiseLoats[date].typeWiseLoat.length

@@ -13,10 +13,9 @@ const LoatSchema = new mongoose.Schema(
       required: true,
       ref:'User',
     },
-    cutId: {
-      type: ObjectId,
-      required: true,
-    },
+    // cutId: {
+    //   type: ObjectId,
+    // },
     typeId: {
       type: ObjectId,
     },
