@@ -1241,22 +1241,22 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
         { $sort : { "year" : -1 } },
     ])
 
-    function removeJSONString(obj, deleteKey) {
-      // store all keys of this object for later use
-      let keys = Object.keys(obj);
-      // for each key update the "passed Key" key
-      keys.map(key => {
-        // updates only if it has "passed Key"
-        if (obj[key].hasOwnProperty(deleteKey)) {
-          // assign the current obj a new field with "passed Key" value pair
-          Object.assign(obj[key], obj[key][deleteKey]);
-          // delete "passed Key" key from this object
-          delete obj[key][deleteKey];
-        }
-      })
-      // updated all fields of obj
-      return obj;
-    }
+    // function removeJSONString(obj, deleteKey) {
+    //   // store all keys of this object for later use
+    //   let keys = Object.keys(obj);
+    //   // for each key update the "passed Key" key
+    //   keys.map(key => {
+    //     // updates only if it has "passed Key"
+    //     if (obj[key].hasOwnProperty(deleteKey)) {
+    //       // assign the current obj a new field with "passed Key" value pair
+    //       Object.assign(obj[key], obj[key][deleteKey]);
+    //       // delete "passed Key" key from this object
+    //       delete obj[key][deleteKey];
+    //     }
+    //   })
+    //   // updated all fields of obj
+    //   return obj;
+    // }
 
     let partyDetails = []
     let yearLoats = loats
@@ -1348,11 +1348,9 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
 
                         const findLoatsIndex = partyDetails[existParty].payment[existYear].details[existMonth].loat.findIndex((d) => d.type === typeWiseLoat[typeLoat].loats[0].type)
                         if(findLoatsIndex !== -1){
-                          partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats.push({ ...typeWiseLoat[typeLoat].loats }) 
 
-                          for(let i = 0; i <5; i++) {
-                            removeJSONString(partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats, `${i}`)
-                          }
+                          partyDetails[existParty].payment[existYear].details[existMonth].loat[findLoatsIndex].loats.push(...typeWiseLoat[typeLoat].loats) 
+                          
                         } else {
                           partyDetails[existParty].payment[existYear].details[existMonth].loat.push({...{ type:typeWiseLoat[typeLoat].loats[0].type}, ...{loats:typeWiseLoat[typeLoat].loats}})
                         }
@@ -1677,7 +1675,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
       }
     }
     // END Convert Final Object
-    res.send(successRes(newPartyDetails)) // get success response
+    res.send(successRes(partyDetails)) // get success response
   } catch (error) {
     console.log('error', error);
     res.send(errorRes(error.message)) // get error response
