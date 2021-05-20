@@ -1675,7 +1675,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
       }
     }
     // END Convert Final Object
-    res.send(successRes(partyDetails)) // get success response
+    res.send(successRes(newPartyDetails)) // get success response
   } catch (error) {
     console.log('error', error);
     res.send(errorRes(error.message)) // get error response
