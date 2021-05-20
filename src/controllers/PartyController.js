@@ -415,36 +415,9 @@ const getPartyLoatDateWise = async (req, res, next) => {
 
     party = party[0] || {}
 
-    let allKeys = {
-      TotalDimonds: 0,
-      TotalWeight: 0,
-      TotalAmount: 0,
-      TotalDiamondWiseCount: 0,
-      TotalDiamondWiseWeight: 0,
-      TotalDiamondWiseAmount: 0,
-      TotalWeightWiseCount: 0,
-      TotalWeightWiseWeight: 0,
-      TotalWeightWiseAmount: 0,
-      paymentDetails:[]
-    }
-    
     const partyDetail = party.cuttingType || []
 
-      if (partyDetail && partyDetail.length > 0) {
-          partyDetail.map((type) => {
-              allKeys.paymentDetails.push(
-                  {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
-                  {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-              )
-          })
-      }
+    let allKeys = helper.createPaymentObject(partyDetail)
 
     const totalLoatLength = loats.length
     if (loats && totalLoatLength > 0) {
@@ -457,32 +430,7 @@ const getPartyLoatDateWise = async (req, res, next) => {
               loatsCaret:0
           }
 
-          let newAllKeys = {
-              TotalDimonds: 0,
-              TotalWeight: 0,
-              TotalAmount: 0,
-              TotalDiamondWiseCount: 0,
-              TotalDiamondWiseWeight: 0,
-              TotalDiamondWiseAmount: 0,
-              TotalWeightWiseCount: 0,
-              TotalWeightWiseWeight: 0,
-              TotalWeightWiseAmount: 0,
-              paymentDetails:[]
-          }
-
-          partyDetail.map((type) => {
-            newAllKeys.paymentDetails.push(
-                {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price},
-                {key: `Total Weight (${type.cutType})`, value: 0, price:type.price},
-                {key: `Total Amount (${type.cutType})`, value: 0, price:type.price},
-                {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price},
-                {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price},
-                {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price},
-                {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price},
-                {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price},
-                {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price},
-            )
-          })
+          let newAllKeys = helper.createPaymentObject(partyDetail)
 
         if (totalTypeWiseLoatLength > 0) {
           for (let j=0; j<totalTypeWiseLoatLength; j++) {
@@ -843,37 +791,8 @@ const getPartyLoatYearWise = async (req, res, next) => {
       ])
       
     party = party[0] || {}
-
-    let allTotal = {
-      TotalDimonds: 0,
-      TotalWeight: 0,
-      TotalAmount: 0,
-      TotalDiamondWiseCount: 0,
-      TotalDiamondWiseWeight: 0,
-      TotalDiamondWiseAmount: 0,
-      TotalWeightWiseCount: 0,
-      TotalWeightWiseWeight: 0,
-      TotalWeightWiseAmount: 0,
-      paymentDetails:[]
-    }
-    
     const partyDetail = party.cuttingType || []
-
-    if (partyDetail && partyDetail.length > 0) {
-        partyDetail.map((type) => {
-            allTotal.paymentDetails.push(
-                {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Total Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Total Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-            )
-        })
-    }
+    let allTotal = helper.createPaymentObject(partyDetail)
 
     const yearLoats = loats
     const totalYearLength = loats.length
@@ -883,64 +802,15 @@ const getPartyLoatYearWise = async (req, res, next) => {
         const yearWiseLoats = yearLoats[year].yearWiseLoats
         const totalMonthLength = yearLoats[year].yearWiseLoats.length
 
-        let yearWiseTotal = {
-          TotalDimonds: 0,
-          TotalWeight: 0,
-          TotalAmount: 0,
-          TotalDiamondWiseCount: 0,
-          TotalDiamondWiseWeight: 0,
-          TotalDiamondWiseAmount: 0,
-          TotalWeightWiseCount: 0,
-          TotalWeightWiseWeight: 0,
-          TotalWeightWiseAmount: 0,
-          paymentDetails:[]
-        }
+        let yearWiseTotal = helper.createPaymentObject(partyDetail)
 
-        partyDetail.map((type) => {
-          yearWiseTotal.paymentDetails.push(
-              {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Total Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Total Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-          )
-        })
         if (yearWiseLoats && totalMonthLength > 0) {
           for (let month=0; month<totalMonthLength; month++) {
               
             const totalLoatLength = yearWiseLoats[month].monthWiseLoats.length
             const dateWiseLoats = yearWiseLoats[month].monthWiseLoats
 
-            let monthWiseTotal = {
-              TotalDimonds: 0,
-              TotalWeight: 0,
-              TotalAmount: 0,
-              TotalDiamondWiseCount: 0,
-              TotalDiamondWiseWeight: 0,
-              TotalDiamondWiseAmount: 0,
-              TotalWeightWiseCount: 0,
-              TotalWeightWiseWeight: 0,
-              TotalWeightWiseAmount: 0,
-              paymentDetails:[]
-            }
-
-            partyDetail.map((type) => {
-              monthWiseTotal.paymentDetails.push(
-                  {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Total Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-              )
-            })
+            let monthWiseTotal = helper.createPaymentObject(partyDetail)
 
             if (dateWiseLoats && totalLoatLength > 0) {
               for (let date=0; date<totalLoatLength; date++) {
@@ -952,32 +822,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
                     loatsCaret:0
                 }
 
-                let dayWiseTotal = {
-                    TotalDimonds: 0,
-                    TotalWeight: 0,
-                    TotalAmount: 0,
-                    TotalDiamondWiseCount: 0,
-                    TotalDiamondWiseWeight: 0,
-                    TotalDiamondWiseAmount: 0,
-                    TotalWeightWiseCount: 0,
-                    TotalWeightWiseWeight: 0,
-                    TotalWeightWiseAmount: 0,
-                    paymentDetails:[]
-                }
-
-                partyDetail.map((type) => {
-                    dayWiseTotal.paymentDetails.push(
-                        {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Total Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Total Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                        {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                    )
-                })
+                let dayWiseTotal = helper.createPaymentObject(partyDetail)
 
                 if (totalTypeWiseLoatLength > 0) {
                   for (let j=0; j<totalTypeWiseLoatLength; j++) {
@@ -1382,36 +1227,9 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
     if (partyDetails && totalPartyLength > 0) {
       for (let py=0; py<totalPartyLength; py++) {
 
-        let allTotal = {
-          TotalDimonds: 0,
-          TotalWeight: 0,
-          TotalAmount: 0,
-          TotalDiamondWiseCount: 0,
-          TotalDiamondWiseWeight: 0,
-          TotalDiamondWiseAmount: 0,
-          TotalWeightWiseCount: 0,
-          TotalWeightWiseWeight: 0,
-          TotalWeightWiseAmount: 0,
-          paymentDetails:[]
-        }
-
         const partyDetail = partyDetails[py].cuttingType || []
 
-        if (partyDetail && partyDetail.length > 0) {
-            partyDetail.map((type) => {
-                allTotal.paymentDetails.push(
-                    {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Total Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Total Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                    {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds},
-                )
-            })
-        }
+        let allTotal = helper.createPaymentObject(partyDetail)
 
         const yearLoats =  partyDetails[py].payment
         const totalYearLength = yearLoats.length
@@ -1421,32 +1239,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
             const yearWiseLoats = yearLoats[year].details
             const totalMonthLength = yearLoats[year].details.length
 
-            let yearWiseTotal = {
-              TotalDimonds: 0,
-              TotalWeight: 0,
-              TotalAmount: 0,
-              TotalDiamondWiseCount: 0,
-              TotalDiamondWiseWeight: 0,
-              TotalDiamondWiseAmount: 0,
-              TotalWeightWiseCount: 0,
-              TotalWeightWiseWeight: 0,
-              TotalWeightWiseAmount: 0,
-              paymentDetails:[]
-            }
-
-            partyDetail.map((type) => {
-              yearWiseTotal.paymentDetails.push(
-                  {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Total Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Total Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-                  {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price,isMWDimond: type.multiWithDiamonds},
-              )
-            })
+            let yearWiseTotal = helper.createPaymentObject(partyDetail)
 
             if (yearWiseLoats && totalMonthLength > 0) {
               for (let month=0; month<totalMonthLength; month++) {
@@ -1454,32 +1247,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                 const totalLoatLength = yearWiseLoats[month].loat.length
                 const tLoat = yearWiseLoats[month].loat
 
-                let monthWiseTotal = {
-                  TotalDimonds: 0,
-                  TotalWeight: 0,
-                  TotalAmount: 0,
-                  TotalDiamondWiseCount: 0,
-                  TotalDiamondWiseWeight: 0,
-                  TotalDiamondWiseAmount: 0,
-                  TotalWeightWiseCount: 0,
-                  TotalWeightWiseWeight: 0,
-                  TotalWeightWiseAmount: 0,
-                  paymentDetails:[]
-                }
-
-                partyDetail.map((type) => {
-                  monthWiseTotal.paymentDetails.push(
-                      {key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Total Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Total Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                      {key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price ,isMWDimond: type.multiWithDiamonds},
-                  )
-                })
+                let monthWiseTotal = helper.createPaymentObject(partyDetail)
 
                 if (totalLoatLength > 0) {
                   for (let j=0; j<totalLoatLength; j++) {

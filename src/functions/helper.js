@@ -320,6 +320,40 @@ const getDay = (date) => {
   return moment(moment(date, 'DD-MM-YYYY')).day()
 }
 
+const createPaymentObject = (partyDetail) => {
+    
+    const paymentObject = {
+        TotalDimonds: 0,
+        TotalWeight: 0,
+        TotalAmount: 0,
+        TotalDiamondWiseCount: 0,
+        TotalDiamondWiseWeight: 0,
+        TotalDiamondWiseAmount: 0,
+        TotalWeightWiseCount: 0,
+        TotalWeightWiseWeight: 0,
+        TotalWeightWiseAmount: 0,
+        paymentDetails:[]
+    }
+
+    if (partyDetail && partyDetail.length > 0) {
+        partyDetail.map((type) => {
+            paymentObject.paymentDetails.push(
+                { key: `Total Diamonds (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Total Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Total Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Diamond Wise Count (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Diamond Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Diamond Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Weight Wise Diamond (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Weight Wise Weight (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+                { key: `Weight Wise Amount (${type.cutType})`, value: 0, price:type.price, isMWDimond: type.multiWithDiamonds },
+            )
+        })
+    }
+    
+    return paymentObject
+}
+
 const helper = {
     removeFile,
     moveFile,
@@ -332,7 +366,8 @@ const helper = {
     getRandomNumber,
     formatDate,
     getMonth,
-    getYear
+    getYear,
+    createPaymentObject
 }
 
 export { errorRes, successRes, successMessage, errorMessage }
