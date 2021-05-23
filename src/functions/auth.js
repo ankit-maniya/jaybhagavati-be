@@ -1,4 +1,4 @@
-import { config } from "../../config"
+import { config } from "../configs/config"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import { model } from "../models"

@@ -1,10 +1,15 @@
 import mongoose from "mongoose"
+import moment from "moment"
+import ejs from "ejs"
+import pdf from "html-pdf"
+import path from "path"
+import _ from "lodash"
+
 import { uploadFileToStorage } from "../functions/uploadfile"
 import helper, { errorRes, successRes } from "../functions/helper"
 import { model } from "../models"
 import Partyschema from "../validation/PartySchema"
-import moment from "moment"
-import _ from "lodash"
+import { config } from "../configs/config"
 
 const ObjectId = mongoose.Types.ObjectId
 
@@ -64,9 +69,9 @@ const getParty = async (req, res, next) => {
       
     party = party || []
 
-    res.send(successRes(party)) // get success response
+    res.send(successRes(party))
   } catch (error) {
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -133,9 +138,9 @@ const getAllDeletedParty = async (req, res, next) => {
 
     party = party || []
 
-    res.send(successRes(party)) // get success response
+    res.send(successRes(party))
   } catch (error) {
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -151,9 +156,9 @@ const getSingleParty = async (req, res, next) => {
 
         let party = await model.Party.findOne(query,{ cuttingType: 0})
 
-        res.send(successRes(party)) // get success response
+        res.send(successRes(party))
     } catch (error) {
-        res.send(errorRes(error.message)) // get error response
+        res.send(errorRes(error.message))
     }
 }
 
@@ -195,9 +200,9 @@ const addParty = async (req, res, next) => {
       await helper.moveFile(partyData.profile, partyData._id, "PARTY")
     }
 
-    res.send(successRes(partyData)) // get success response
+    res.send(successRes(partyData))
   } catch (error) {
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -314,11 +319,11 @@ const updateParty = async (req, res, next) => {
       { new: true }
     )
 
-    res.send(successRes(party)) // get success response
+    res.send(successRes(party))
   } catch (error) {
 
     console.log(error);
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -531,10 +536,10 @@ const getPartyLoatDateWise = async (req, res, next) => {
 
     const payment = { party, loats, allKeys}
 
-    res.send(successRes(payment)) // get success response
+    res.send(successRes(payment))
   } catch (error) {
       console.log('error', error)
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -611,9 +616,9 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
         { $sort : { _id : -1 } }
     ])
 
-    res.send(successRes(loats)) // get success response
+    res.send(successRes(loats))
   } catch (error) {
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -992,9 +997,9 @@ const getPartyLoatYearWise = async (req, res, next) => {
 
     const payment = { party, loats, allTotal}
 
-    res.send(successRes(payment)) // get success response
+    res.send(successRes(payment))
   } catch (error) {
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
   }
 }
 
@@ -1443,10 +1448,58 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
       }
     }
     // END Convert Final Object
-    res.send(successRes(newPartyDetails)) // get success response
+    res.send(successRes(newPartyDetails))
   } catch (error) {
     console.log('error', error);
-    res.send(errorRes(error.message)) // get error response
+    res.send(errorRes(error.message))
+  }
+}
+
+const generateAllInvoicePDF = async (req, res, next) => {
+  try {
+    let { allInvoiceData, date, user } = req.body
+
+    if (!allInvoiceData) {
+      throw { message: "Please pass all Invoice Data!" }
+    }
+
+    allInvoiceData = JSON.parse(allInvoiceData)
+
+    const fileName = `All-Invoices${date}.pdf`
+    const viewFilePath = path.join(__dirname, "../views/bill.ejs")
+  
+    ejs.renderFile(viewFilePath, { allInvoiceData } , (err, data) => {
+        if (err) {
+              res.send(err);
+        } else {
+          let options = {
+              "height": "20.25in",
+              "width": "18.5in",
+              "header": {
+                "height": "45px",
+                "contents": `<div style="text-align: center;margin-top:18px;">${user}${date}</div>`
+              },
+              paginationOffset: 1,
+              "footer": {
+                "height": "28mm",
+                "contents": {
+                  default: '<span style="color: #444;text-align: center; padding-top: 7px">{{page}}</span>/<span>{{pages}} pages</span>', // fallback values
+                }
+              },
+          };
+          pdf.create(data, options).toFile(`./uploads/${fileName}`, async (err, data) => {
+              if (err) {
+                  res.send(errorRes(err))
+              } else {
+                  const uploadFile = await helper.updloadFileToFirebase(path.join(__dirname,`../../uploads/${fileName}`))
+                  res.send(successRes(uploadFile))
+              }
+          });
+        }
+    });
+  } catch (error) {
+    console.log('error', error);
+    res.send(errorRes(error.message))
   }
 }
 
@@ -1460,5 +1513,6 @@ export const PartyController = {
   getPartyLoatYearWise,
   getAllPartyLoatYearWise,
   getAllPartyLoatsDateWise,
-  getAllEntryDate
+  getAllEntryDate,
+  generateAllInvoicePDF
 }

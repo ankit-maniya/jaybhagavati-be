@@ -1,7 +1,10 @@
 import fs from "fs"
 import moment from "moment"
 import path from "path"
-import { config } from "../../config"
+import { v4 as uuid } from "uuid"
+import { config } from "../configs/config"
+import { initializeFirebase } from "../models"
+
 
 const errorRes = (message,status = 0) => {
     const iRes = {
@@ -52,10 +55,10 @@ const moveFile = (file, userId, role = "TEMP") => {
         file
     )
 
-    debugger
+
 
     if (!fs.existsSync(userDirPath)) {
-        debugger
+
         fs.mkdir(
             path.join(config.FILE_STORE_PATH, role, userId.toString()),
             (err) => {
@@ -70,7 +73,7 @@ const moveFile = (file, userId, role = "TEMP") => {
             }
         )
     } else {
-        debugger
+
         fs.rename(currentPath, destinationPath, function (errmove) {
             if (errmove) {
                 throw errmove
@@ -230,7 +233,7 @@ const makeDir = async (restaurentPath, oldDirName, newDirName, iD) => {
 const removeFile = (file, role = "TEMP", folder = "") => {
     // We have folder user id (update time)
     if (folder) {
-        debugger
+
         const folderId = folder.toString()
         fs.unlink(path.join(config.USER_FILE_STORE_PATH, folderId, file),
             (err) => {
@@ -238,7 +241,7 @@ const removeFile = (file, role = "TEMP", folder = "") => {
             }
         )
     } else {
-        debugger
+
         // not have folder user id (signup time)
         fs.unlink(path.join(config.FILE_STORE_PATH, role, file),
             (err) => {
@@ -354,6 +357,40 @@ const createPaymentObject = (partyDetail) => {
     return paymentObject
 }
 
+const updloadFileToFirebase = async (filename) => {
+    try {
+        const bucket = await initializeFirebase()
+        const metadata = {
+        metadata: {
+            // This line is very important. It's to create a download token.
+            firebaseStorageDownloadTokens: uuid()
+        },
+        contentType: 'application/pdf',
+        cacheControl: 'public, max-age=31536000',
+        };
+    
+        // Uploads a local file to the bucket
+        await bucket.upload(filename, {
+        // Support for HTTP requests made with `Accept-Encoding: gzip`
+        gzip: true,
+        metadata: metadata,
+        });
+
+        console.log(`${filename} uploaded.`);
+
+        fs.unlink(path.join(filename), (err) => {
+            if (err) throw err
+        })
+
+        console.log(`${config.FIREBASE_IMAGE_URL}${filename.split('/').pop()}?alt=media`);
+
+        return `${config.FIREBASE_IMAGE_URL}${filename.split('/').pop()}?alt=media`
+    } catch(err) {
+        console.log('err', err);
+        throw err 
+    }
+}
+
 const helper = {
     removeFile,
     moveFile,
@@ -367,7 +404,8 @@ const helper = {
     formatDate,
     getMonth,
     getYear,
-    createPaymentObject
+    createPaymentObject,
+    updloadFileToFirebase
 }
 
 export { errorRes, successRes, successMessage, errorMessage }
