@@ -1,15 +1,14 @@
-import mongoose from "mongoose"
-import moment from "moment"
-import ejs from "ejs"
-import pdf from "html-pdf"
-import path from "path"
-import _ from "lodash"
+import mongoose from 'mongoose'
+import moment from 'moment'
+import ejs from 'ejs'
+import pdf from 'html-pdf'
+import path from 'path'
+import _ from 'lodash'
 
-import { uploadFileToStorage } from "../functions/uploadfile"
-import helper, { errorRes, successRes } from "../functions/helper"
-import { model } from "../models"
-import Partyschema from "../validation/PartySchema"
-import { config } from "../configs/config"
+import { uploadFileToStorage } from '../functions/uploadfile'
+import helper, { errorRes, successRes } from '../functions/helper'
+import { model } from '../models'
+import Partyschema from '../validation/PartySchema'
 
 const ObjectId = mongoose.Types.ObjectId
 
@@ -21,7 +20,7 @@ const getParty = async (req, res, next) => {
     //   isDelete : false,
     //   userId: _id,
     //   // cuttingType: {
-    //   //   "$elemMatch": {
+    //   //   '$elemMatch': {
     //   //     isDelete: false
     //   //   }
     //   // }
@@ -55,9 +54,9 @@ const getParty = async (req, res, next) => {
             updatedAt: 1,
             cuttingType : {
               $filter: {
-              input: "$cuttingType",
-              as: "item",
-              cond: {$eq: ["$$item.isDelete", false]}
+              input: '$cuttingType',
+              as: 'item',
+              cond: {$eq: ['$$item.isDelete', false]}
             }
           }
         }
@@ -90,7 +89,7 @@ const getAllDeletedParty = async (req, res, next) => {
     ]
 
     if (deletdCuttingType) {
-      query = [...query, { "cuttingType": { $exists:true, "$ne":[] } } ]
+      query = [...query, { 'cuttingType': { $exists:true, '$ne':[] } } ]
     }
 
     let party = await model.Party.aggregate([
@@ -103,15 +102,15 @@ const getAllDeletedParty = async (req, res, next) => {
         $sort: { createdAt:1 }
       },
       {
-          $unwind: "$cuttingType"
+          $unwind: '$cuttingType'
       },
       {
-          $match: { "cuttingType.isDelete": deletdCuttingType }
+          $match: { 'cuttingType.isDelete': deletdCuttingType }
       },
       {
           $group: { 
-              _id: "$_id",
-              data: { $push: "$$ROOT" }
+              _id: '$_id',
+              data: { $push: '$$ROOT' }
           }
       },
         {
@@ -122,16 +121,16 @@ const getAllDeletedParty = async (req, res, next) => {
       {
           $project: {
               _id:1,
-              "isActive" : { $first: "$data.isActive"},
-            "isDelete" : { $first: "$data.isDelete"},
-            "mobile" : { $first: "$data.mobile"},
-            "name" : { $first: "$data.name"},
-            "billingName" : { $first: "$data.billingName"},
-              "userId":{ $first: "$data.userId"},
-              "cuttingType":1,
-              "balanceSheet": { $first: "$data.balanceSheet" },
-              "createdAt":{ $first: "$data.createdAt"},
-              "updatedAt": { $first: "$data.updatedAt"}
+              'isActive' : { $first: '$data.isActive'},
+            'isDelete' : { $first: '$data.isDelete'},
+            'mobile' : { $first: '$data.mobile'},
+            'name' : { $first: '$data.name'},
+            'billingName' : { $first: '$data.billingName'},
+              'userId':{ $first: '$data.userId'},
+              'cuttingType':1,
+              'balanceSheet': { $first: '$data.balanceSheet' },
+              'createdAt':{ $first: '$data.createdAt'},
+              'updatedAt': { $first: '$data.updatedAt'}
           }
       }
     ])
@@ -183,21 +182,21 @@ const addParty = async (req, res, next) => {
     if (isValidate.statuscode != 1) {
       if (req.files && req.files.profile && req.files.profile[0].filename) {
         // if error remove file
-        helper.removeFile(req.files.profile[0].filename, "TEMP")
+        helper.removeFile(req.files.profile[0].filename, 'TEMP')
       }
       throw { message: isValidate.message }
     }
 
     if (req.files && req.files.profile && req.files.profile[0].filename) {
       // set profile for add name in database
-      bodyData["profile"] = req.files.profile[0].filename
+      bodyData['profile'] = req.files.profile[0].filename
     }
 
     let partyData = await model.Party.create({...bodyData, userId: _id}) // add party bodyData
 
     if (req.files && req.files.profile) {
       // move file from TEMP location
-      await helper.moveFile(partyData.profile, partyData._id, "PARTY")
+      await helper.moveFile(partyData.profile, partyData._id, 'PARTY')
     }
 
     res.send(successRes(partyData))
@@ -222,7 +221,7 @@ const updateParty = async (req, res, next) => {
     }
 
     // update edited time
-    updateData["updatedAt"] = new Date()
+    updateData['updatedAt'] = new Date()
     const isValidate = await Partyschema.checkUpdatePartyInputValidate(
       updateData,
       _id
@@ -231,7 +230,7 @@ const updateParty = async (req, res, next) => {
     if (isValidate.statuscode != 1) {
       if (req.files && req.files.profile && req.files.profile[0].filename) {
         // if error remove file
-        helper.removeFile(req.files.profile[0].filename, "TEMP")
+        helper.removeFile(req.files.profile[0].filename, 'TEMP')
       }
       throw { message: isValidate.message }
     }
@@ -240,12 +239,12 @@ const updateParty = async (req, res, next) => {
 
 
     // // add cuttingType with push old cuttingType (combine)
-    // if (updateData["cuttingType"]) {
-    //   updateData["cuttingType"].map((cuttingData) => {
+    // if (updateData['cuttingType']) {
+    //   updateData['cuttingType'].map((cuttingData) => {
     //     if (cuttingData._id) {
     //       let getIndex = partyData.cuttingType.findIndex((d) => d.id === cuttingData._id)
     //       if (getIndex !== undefined && getIndex !== -1) {
-    //         updateData["cuttingType"][getIndex] = cuttingData
+    //         updateData['cuttingType'][getIndex] = cuttingData
     //       }
     //     }
     //   })
@@ -256,12 +255,12 @@ const updateParty = async (req, res, next) => {
     let cuttingTypeData = []
     let oldCutType
     let newCutType
-    if (updateData["cuttingType"]) {
-      updateData["cuttingType"].map((cuttingData) => {
+    if (updateData['cuttingType']) {
+      updateData['cuttingType'].map((cuttingData) => {
 
-        const cutID = cuttingData.update_id || ""
+        const cutID = cuttingData.update_id || ''
 
-        if (cutID !== "") {
+        if (cutID !== '') {
           let getIndex = partyData.cuttingType.findIndex((d) => d._id.toString() == cutID)
 
           if (getIndex !== -1) {
@@ -278,7 +277,7 @@ const updateParty = async (req, res, next) => {
           let typeExist = partyData.cuttingType.find((d) => d.cutType === cuttingData.cutType)
 
           if (!typeExist) {
-            if(cutID === ""){
+            if(cutID === ''){
               delete cuttingData.update_id
             }
             
@@ -294,17 +293,17 @@ const updateParty = async (req, res, next) => {
         await model.Loat.updateMany({ cuttingType:oldCutType.cutType, cutId: oldCutType._id, partyId:updateData.partyId},{ $set: { cuttingType:newCutType.cutType } })
       }
 
-      updateData["cuttingType"] = [...cuttingTypeData,...partyData.cuttingType]
+      updateData['cuttingType'] = [...cuttingTypeData,...partyData.cuttingType]
     }
 
     if (req.files && req.files.profile && req.files.profile[0].filename) {
       // set profile for add name in database
-      updateData["profile"] = req.files.profile[0].filename
-      await helper.moveFile(updateData["profile"], updateData.partyId, "PARTY") //move latest file role wise
+      updateData['profile'] = req.files.profile[0].filename
+      await helper.moveFile(updateData['profile'], updateData.partyId, 'PARTY') //move latest file role wise
 
       if (profile) {
         //delete old file
-        helper.removeFile(profile, "PARTY", updateData.partyId)
+        helper.removeFile(profile, 'PARTY', updateData.partyId)
       }
     }
 
@@ -333,7 +332,7 @@ const getPartyLoatDateWise = async (req, res, next) => {
     const { _id } = req.user // login user bodyData
 
     if (!partyId) {
-        throw { message: "PartyId is Require" }
+        throw { message: 'PartyId is Require' }
     }
 
     let loats = await model.Loat.aggregate([
@@ -345,8 +344,8 @@ const getPartyLoatDateWise = async (req, res, next) => {
                       { isDelete: false },
                       {
                           cuttingType:{
-                              "$exists": true,
-                              "$ne": null,
+                              '$exists': true,
+                              '$ne': null,
                           }
                       },
                   ]
@@ -357,18 +356,18 @@ const getPartyLoatDateWise = async (req, res, next) => {
           },
           {
               $group : {
-                  _id : { type: "$cuttingType", date : "$entryDate"},
+                  _id : { type: '$cuttingType', date : '$entryDate'},
                   loats: {
                       $push: {
-                          type:"$cuttingType",
-                          numOfDimonds:"$numOfDimonds",
-                          loatWeight:"$loatWeight",
-                          loatPrice:"$loatPrice",
-                          multiWithDiamonds:"$multiWithDiamonds",
+                          type:'$cuttingType',
+                          numOfDimonds:'$numOfDimonds',
+                          loatWeight:'$loatWeight',
+                          loatPrice:'$loatPrice',
+                          multiWithDiamonds:'$multiWithDiamonds',
                           price:{
-                              $cond: { if: { "$eq": [ "$multiWithDiamonds", true ] },
-                                  then: { $round:[{ "$multiply": ["$numOfDimonds","$loatPrice"] }, 2] },
-                                  else: { $round:[{ "$multiply": ["$loatWeight","$loatPrice"] }, 2] },
+                              $cond: { if: { '$eq': [ '$multiWithDiamonds', true ] },
+                                  then: { $round:[{ '$multiply': ['$numOfDimonds','$loatPrice'] }, 2] },
+                                  else: { $round:[{ '$multiply': ['$loatWeight','$loatPrice'] }, 2] },
                               }
                           },
                       },
@@ -377,9 +376,9 @@ const getPartyLoatDateWise = async (req, res, next) => {
           },
           {
               $group : {
-                  _id : "$_id.date",
+                  _id : '$_id.date',
                   typeWiseLoat: {
-                      $push: "$$ROOT"
+                      $push: '$$ROOT'
                   },
               },
           },
@@ -409,9 +408,9 @@ const getPartyLoatDateWise = async (req, res, next) => {
                 updatedAt: 1,
                 cuttingType : {
                   $filter: {
-                  input: "$cuttingType",
-                  as: "item",
-                  cond: {$eq: ["$$item.isDelete", false]}
+                  input: '$cuttingType',
+                  as: 'item',
+                  cond: {$eq: ['$$item.isDelete', false]}
                 }
               }
             }
@@ -549,7 +548,7 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
     const { _id } = req.user // login user bodyData
     const { date } = req.body
     if (!date) {
-        throw { message: "Date is Required!" }
+        throw { message: 'Date is Required!' }
     } 
 
     // const findDate = `${moment(moment(date, 'DD-MM-YYYY')).format('YYYY-MM-DD')}T05:30:00.000+05:30`
@@ -561,56 +560,56 @@ const getAllPartyLoatsDateWise = async (req, res, next) => {
         },
         { 
             $lookup: {
-              from: "parties",
-              localField: "partyId",
-              foreignField: "_id",
-              as: "party"
+              from: 'parties',
+              localField: 'partyId',
+              foreignField: '_id',
+              as: 'party'
             }
         },
         {
             $group : {
-                _id :{ dateString: "$entryDate" },
+                _id :{ dateString: '$entryDate' },
                 loats: {
                     $push: {
-                        loatId:"$_id",
-                        entryDate:"$entryDate",
-                        cuttingType:"$cuttingType",
-                        numOfDimonds:"$numOfDimonds",
-                        loatWeight:"$loatWeight",
-                        loatPrice:"$loatPrice",
-                        multiWithDiamonds:"$multiWithDiamonds",
+                        loatId:'$_id',
+                        entryDate:'$entryDate',
+                        cuttingType:'$cuttingType',
+                        numOfDimonds:'$numOfDimonds',
+                        loatWeight:'$loatWeight',
+                        loatPrice:'$loatPrice',
+                        multiWithDiamonds:'$multiWithDiamonds',
                         diamondWiseprice:{
                             $cond: { 
-                              if: { "$eq": [ "$multiWithDiamonds", true ] },
-                                then: { $round:[{ "$multiply": ["$numOfDimonds","$loatPrice"] }, 2]},
+                              if: { '$eq': [ '$multiWithDiamonds', true ] },
+                                then: { $round:[{ '$multiply': ['$numOfDimonds','$loatPrice'] }, 2]},
                                 else: 0 
                               }
                         },
                         weightWiseprice:{
                           $cond: { 
-                            if: { "$eq": [ "$multiWithDiamonds", false ] },
-                              then: { $round:[{ "$multiply": ["$loatWeight","$loatPrice"] }, 2]},
+                            if: { '$eq': [ '$multiWithDiamonds', false ] },
+                              then: { $round:[{ '$multiply': ['$loatWeight','$loatPrice'] }, 2]},
                               else: 0 
                             },
                         },
-                        partyId:{ $first:"$party._id" },
-                        name:{ $first:"$party.name" },
-                        mobile:{ $first:"$party.mobile" }
+                        partyId:{ $first:'$party._id' },
+                        name:{ $first:'$party.name' },
+                        mobile:{ $first:'$party.mobile' }
                     },
                 }
             },
         },
         {
           $addFields:{
-            totalWeight : { $round:[{ $sum: "$loats.loatWeight" }, 2]},
-            totalDimonds : { $sum: "$loats.numOfDimonds" },
-            totalWeightWisePayment : { $round:[{ $sum: "$loats.weightWiseprice" }, 2]},
-            totalDimondsWisePayment : { $round:[{ $sum: "$loats.diamondWiseprice" }, 2]},
+            totalWeight : { $round:[{ $sum: '$loats.loatWeight' }, 2]},
+            totalDimonds : { $sum: '$loats.numOfDimonds' },
+            totalWeightWisePayment : { $round:[{ $sum: '$loats.weightWiseprice' }, 2]},
+            totalDimondsWisePayment : { $round:[{ $sum: '$loats.diamondWiseprice' }, 2]},
           }
         },
         {
           $addFields:{
-            totalPayment : { $round:[{ $sum: ["$totalWeightWisePayment", "$totalDimondsWisePayment"] }, 2] },
+            totalPayment : { $round:[{ $sum: ['$totalWeightWisePayment', '$totalDimondsWisePayment'] }, 2] },
           }
         },
         { $sort : { _id : -1 } }
@@ -633,38 +632,53 @@ const getAllEntryDate = async (req, res, next) => {
         },
         {
           $group: {
-              _id:"$entryDate",
-              totalWeight: {
-                  $sum: "$loatWeight",
-              },
-              totalDimonds: {
-                  $sum: "$numOfDimonds",
-              },
+            _id:'$entryDate',
+            totalWeight: {
+                $sum: '$loatWeight',
+            },
+            totalDimonds: {
+                $sum: '$numOfDimonds',
+            },
+            loats: {
+              $push: {
+                price: {
+                  $cond: { if: { $eq: [ '$multiWithDiamonds', true ] },
+                      then: { $round:[{ $multiply: ['$numOfDimonds','$loatPrice'] }, 2] },
+                      else: { $round:[{ $multiply: ['$loatWeight','$loatPrice'] }, 2] },
+                  }
+                },
+              }
+            },
           }
         },
         {
-          $sort: { 
-                  _id: 1 
-              },
+          $addFields: {
+            'totalAmount': { $sum: '$loats.price' }
+          }
+        },
+        {
+          $sort: { _id: 1 },
         },
         {
           $group: {
-              _id : { "month":{$month:"$_id"}, "year": {$year:"$_id"} },
+              _id : { 'month':{ $month:'$_id' }, 'year': { $year:'$_id' } },
               dayWiseTotal: {
-                $push: "$$ROOT"
+                $push: '$$ROOT'
               },
-              monthWiseTotalWeight:{ $sum: "$totalWeight" },
-              monthWiseTotalDimonds:{ $sum: "$totalDimonds" },
+              monthWiseTotalWeight:{ $sum: '$totalWeight' },
+              monthWiseTotalDimonds:{ $sum: '$totalDimonds' },
+              monthWiseTotalAmounts:{ $sum: '$totalAmount' },
           }
         },
         {
           $group: {
-              _id : "$_id.year",
+              _id : '$_id.year',
               monthWiseTotal: {
-                $push: "$$ROOT"
+                $push: '$$ROOT'
               },
-              yearWiseTotalWeight:{ $sum: "$monthWiseTotalWeight" },
-              yearWiseTotalDimonds:{ $sum: "$monthWiseTotalDimonds" },
+              yearWiseTotalWeight:{ $sum: '$monthWiseTotalWeight' },
+              yearWiseTotalDimonds:{ $sum: '$monthWiseTotalDimonds' },
+              yearWiseTotalAmounts:{ $sum: '$monthWiseTotalAmounts' },
           }
         },
         {
@@ -685,7 +699,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
     const { _id } = req.user // login user bodyData
 
     if (!partyId) {
-        throw { message: "PartyId is Require" }
+        throw { message: 'PartyId is Require' }
     }
 
     let loats = await model.Loat.aggregate([
@@ -697,8 +711,8 @@ const getPartyLoatYearWise = async (req, res, next) => {
                     { isDelete : false },
                     {
                         cuttingType:{
-                            "$exists": true,
-                            "$ne": null
+                            '$exists': true,
+                            '$ne': null
                         }
                     }
                 ]
@@ -709,18 +723,18 @@ const getPartyLoatYearWise = async (req, res, next) => {
         },
         {
             $group : {
-                _id : { type: "$cuttingType", date : "$entryDate"},
+                _id : { type: '$cuttingType', date : '$entryDate'},
                 loats: {
                     $push: {
-                        type:"$cuttingType",
-                        numOfDimonds:"$numOfDimonds",
-                        loatWeight:"$loatWeight",
-                        loatPrice:"$loatPrice",
-                        multiWithDiamonds:"$multiWithDiamonds",
+                        type:'$cuttingType',
+                        numOfDimonds:'$numOfDimonds',
+                        loatWeight:'$loatWeight',
+                        loatPrice:'$loatPrice',
+                        multiWithDiamonds:'$multiWithDiamonds',
                         price:{
-                            $cond: { if: { "$eq": [ "$multiWithDiamonds", true ] },
-                                then: { $round:[{ "$multiply": ["$numOfDimonds","$loatPrice"] }, 2] },
-                                else: { $round:[{ "$multiply": ["$loatWeight","$loatPrice"] }, 2] },
+                            $cond: { if: { '$eq': [ '$multiWithDiamonds', true ] },
+                                then: { $round:[{ '$multiply': ['$numOfDimonds','$loatPrice'] }, 2] },
+                                else: { $round:[{ '$multiply': ['$loatWeight','$loatPrice'] }, 2] },
                             }
                         },
                     },
@@ -729,38 +743,38 @@ const getPartyLoatYearWise = async (req, res, next) => {
         },
         {
             $group : {
-                _id : "$_id.date",
+                _id : '$_id.date',
                 typeWiseLoat: {
-                    $push: "$$ROOT"
+                    $push: '$$ROOT'
                 },
             },
         },
-        { $sort : { "_id" : 1 } },
+        { $sort : { '_id' : 1 } },
         {
             $group : {
-                _id : { "month":{$month:"$_id"}, "year": {$year:"$_id"} },
+                _id : { 'month':{$month:'$_id'}, 'year': {$year:'$_id'} },
                 monthWiseLoats: {
-                    $push: "$$ROOT"
+                    $push: '$$ROOT'
                 },
             },
         },
-        { $sort : { "_id.month" : 1 } },
+        { $sort : { '_id.month' : 1 } },
         {
             $group : {
-                _id : "$_id.year",
+                _id : '$_id.year',
                 yearWiseLoats: {
-                    $push: "$$ROOT"
+                    $push: '$$ROOT'
                 },
             },
         },
         {
           $project: {
             _id: 0,
-            year: "$_id",
+            year: '$_id',
             yearWiseLoats:1
           }
         },
-        { $sort : { "year" : -1 } },
+        { $sort : { 'year' : -1 } },
     ])
 
     let party = await model.Party.aggregate([
@@ -786,9 +800,9 @@ const getPartyLoatYearWise = async (req, res, next) => {
                 updatedAt: 1,
                 cuttingType : {
                   $filter: {
-                  input: "$cuttingType",
-                  as: "item",
-                  cond: {$eq: ["$$item.isDelete", false]}
+                  input: '$cuttingType',
+                  as: 'item',
+                  cond: {$eq: ['$$item.isDelete', false]}
                 }
               }
             }
@@ -1402,7 +1416,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                 name: party.name,
                 billingName: party.billingName,
               }
-
+              
               if (party.loatHaveMonth.includes(yearWiseLoats[month]._id.month)) {
                 party.payment.forEach((pay) => {
                   
@@ -1460,30 +1474,30 @@ const generateAllInvoicePDF = async (req, res, next) => {
     let { allInvoiceData, date, user } = req.body
 
     if (!allInvoiceData) {
-      throw { message: "Please pass all Invoice Data!" }
+      throw { message: 'Please pass all Invoice Data!' }
     }
 
     allInvoiceData = JSON.parse(allInvoiceData)
 
     const fileName = `All-Invoices${date}.pdf`
-    const viewFilePath = path.join(__dirname, "../views/bill.ejs")
+    const viewFilePath = path.join(__dirname, '../views/bill.ejs')
   
     ejs.renderFile(viewFilePath, { allInvoiceData } , (err, data) => {
         if (err) {
               res.send(err);
         } else {
           let options = {
-              "height": "20.25in",
-              "width": "18.5in",
-              "header": {
-                "height": "45px",
-                "contents": `<div style="text-align: center;margin-top:18px;">${user}${date}</div>`
+              'height': '20.25in',
+              'width': '18.5in',
+              'header': {
+                'height': '45px',
+                'contents': `<div style='text-align: center;margin-top:18px;'>${user}${date}</div>`
               },
               paginationOffset: 1,
-              "footer": {
-                "height": "28mm",
-                "contents": {
-                  default: '<span style="color: #444;text-align: center; padding-top: 7px">{{page}}</span>/<span>{{pages}} pages</span>', // fallback values
+              'footer': {
+                'height': '28mm',
+                'contents': {
+                  default: "<span style='color: #444;text-align: center; padding-top: 7px'>{{page}}</span>/<span>{{pages}} pages</span>", // fallback values
                 }
               },
           };
