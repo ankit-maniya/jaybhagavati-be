@@ -14,7 +14,7 @@
 }
 
 #parties > tr > th {
-    font-size: 15px;
+    font-size: 18px;
 }
 
 #parties tr:nth-child(even){background-color: white;}
@@ -27,11 +27,11 @@
   color: white;
 }
 .tableData > td {
-    font-size: 15px;
+    font-size: 18px;
     padding: 6px
 }
 .header > th {
-    font-size: 15px;
+    font-size: 18px;
 }
 
 .lightBlue  {
@@ -41,7 +41,7 @@
 .text-red  {
   background-color: #ffff;
   color: #f32121;
-  font-size: 15px !important;
+  font-size: 18px !important;
   text-align: center !important;
   font-weight: bold;
 }
@@ -60,6 +60,15 @@
 <body>
 
 <table id="parties">
+  
+  <tr class="footer breakafter text-align-center">
+    <% if (total) { %>
+      <td style="background-color: rgb(255, 0, 183); color: white; padding: 2px; font-size: 20px; font-weight: bold;"> Total Diamonds :: <%= total.totalDiamond %> </td>
+      <td style="background-color: rgb(128, 0, 255); color: white; padding: 2px; font-size: 20px; font-weight: bold;"> Total Weight :: <%= total.totalWeight %> </td>
+      <td style="background-color: rgb(255, 0, 38); color: white; padding: 2px; font-size: 20px; font-weight: bold;"> Total Amount :: <%= total.totalPrice %> </td>
+    <% } %>
+  </tr>
+
   <tr class="header breakafter text-align-center">
     <th>Index</th>
     <th>Party Name</th>
@@ -117,10 +126,6 @@
         </tr>
     <% }
   } %>
-
-  <tr class="header breakafter text-align-center">
-    test
-  </tr>
  
 </table>
 

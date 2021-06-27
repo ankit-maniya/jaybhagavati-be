@@ -1436,7 +1436,13 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                         newPartyDetails.push({ ...{ year: pay.loatYear }, ...{ details: months } })
                       } else {
                         // for only 1 year data push
-                        newPartyDetails.push({ ...{ year: pay.loatYear }, ...{ details: [{ month: pay.details[0].loatMonth, ...{ details: [{ ...partyDetails, monthWiseTotal: pay.details[0].monthWiseTotal }] } }] } })
+                        const totalPrice = {
+                          totalPrices: pay.details[0].monthWiseTotal.TotalAmount || 0,
+                          totalDimonds: pay.details[0].monthWiseTotal.TotalDimonds || 0,
+                          totalWeight: pay.details[0].monthWiseTotal.TotalWeight || 0
+                        } 
+
+                        newPartyDetails.push({ ...{ year: pay.loatYear }, ...{ ...totalPrice }, ...{ details: [{ month: pay.details[0].loatMonth, ...{ details: [{ ...partyDetails, monthWiseTotal: pay.details[0].monthWiseTotal }] } }] } })
                       }
                     } else {
                       const oldMonthIndex = pay.details.findIndex((d) => d.loatMonth === yearWiseLoats[month]._id.month)
@@ -1444,11 +1450,17 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
 
                       if (monthIndex === -1) {
                         if (oldMonthIndex !== -1) {
+                          newPartyDetails[yearIndex].totalPrices += pay.details[oldMonthIndex].monthWiseTotal.TotalAmount
+                          newPartyDetails[yearIndex].totalDimonds += pay.details[oldMonthIndex].monthWiseTotal.TotalDimonds
+                          newPartyDetails[yearIndex].totalWeight += pay.details[oldMonthIndex].monthWiseTotal.TotalWeight
                           newPartyDetails[yearIndex].details.push({ month: pay.details[oldMonthIndex].loatMonth, ...{ details: [{ ...partyDetails, monthWiseTotal: pay.details[oldMonthIndex].monthWiseTotal }] } })
                         }
                       } else {
                         const partyExists = newPartyDetails[yearIndex].details[monthIndex].details.findIndex((d) => d.partyId === party._id)
                         if (oldMonthIndex !== -1 && partyExists === -1) {
+                          newPartyDetails[yearIndex].totalPrices += pay.details[oldMonthIndex].monthWiseTotal.TotalAmount
+                          newPartyDetails[yearIndex].totalDimonds += pay.details[oldMonthIndex].monthWiseTotal.TotalDimonds
+                          newPartyDetails[yearIndex].totalWeight += pay.details[oldMonthIndex].monthWiseTotal.TotalWeight
                           newPartyDetails[yearIndex].details[monthIndex].details.push({ ...partyDetails, monthWiseTotal: pay.details[oldMonthIndex].monthWiseTotal })
                         }
                       }
@@ -1471,7 +1483,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
 
 const generateAllInvoicePDF = async (req, res, next) => {
   try {
-    let { allInvoiceData, date, user } = req.body
+    let { allInvoiceData, date, user, totalDiamond, totalWeight, totalPrice } = req.body
 
     if (!allInvoiceData) {
       throw { message: 'Please pass all Invoice Data!' }
@@ -1479,10 +1491,18 @@ const generateAllInvoicePDF = async (req, res, next) => {
 
     allInvoiceData = JSON.parse(allInvoiceData)
 
+    const total = {
+      totalDiamond,
+      totalWeight,
+      totalPrice
+    }
+
+    console.log('allInvoiceData :: ', allInvoiceData);
+
     const fileName = `All-Invoices${date}.pdf`
     const viewFilePath = path.join(__dirname, '../views/bill.ejs')
   
-    ejs.renderFile(viewFilePath, { allInvoiceData } , (err, data) => {
+    ejs.renderFile(viewFilePath, { allInvoiceData, total } , (err, data) => {
         if (err) {
               res.send(err);
         } else {
