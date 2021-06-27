@@ -12,16 +12,16 @@ const getLoat = async (req, res, next) => {
     const query = {
       isDelete: false,
       userId: _id,
-      createdAt: {
+      entryDate: {
         $gte: await helper.formatDate(new Date()),
-        $lt: await helper.formatDate(new Date())
+        $lte: await helper.formatDate(new Date())
       }
     }
 
     if (from && to) {
-      query.createdAt = {
+      query.entryDate = {
         $gte: await helper.formatDate(from),
-        $lt: await helper.formatDate(to)
+        $lte: await helper.formatDate(to)
       }
     }
 
@@ -29,7 +29,7 @@ const getLoat = async (req, res, next) => {
       page: page || 1,
       limit: limit || 400000,
       populate: 'partyId',
-      sort: { createdAt : 1 }
+      sort: { entryDate: 1 }
     }
 
     if (partyId) {
