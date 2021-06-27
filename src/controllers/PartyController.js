@@ -1487,8 +1487,10 @@ const generateAllInvoicePDF = async (req, res, next) => {
               res.send(err);
         } else {
           let options = {
-              'height': '20.25in',
-              'width': '18.5in',
+              // 'height': '20.25in',
+              // 'width': '18.5in',
+              "format": "Letter",
+              "orientation": "portrait",
               'header': {
                 'height': '45px',
                 'contents': `<div style='text-align: center;margin-top:18px;'>${user}${date}</div>`

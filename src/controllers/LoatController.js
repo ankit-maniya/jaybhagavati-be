@@ -6,25 +6,37 @@ import LoatSchema from "../validation/LoatSchema"
 const getLoat = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
-    const { page, limit } = req.query
+    const { page, limit, from, to } = req.query
     const { partyId } = req.params
-    let query = {
+
+    const query = {
       isDelete: false,
+      userId: _id,
+      createdAt: {
+        $gte: await helper.formatDate(new Date()),
+        $lt: await helper.formatDate(new Date())
+      }
     }
+
+    if (from && to) {
+      query.createdAt = {
+        $gte: await helper.formatDate(from),
+        $lt: await helper.formatDate(to)
+      }
+    }
+
     const options = {
       page: page || 1,
       limit: limit || 400000,
       populate: 'partyId',
-      sort: {createdAt : 1}
+      sort: { createdAt : 1 }
     }
 
     if (partyId) {
-      query['partyId'] = partyId
+      query.partyId = partyId
     }
 
-    query['userId'] = _id
-
-    let loat = await model.Loat.paginate(query, options)
+    const loat = await model.Loat.paginate(query, options)
 
     res.send(successRes(loat)) // get success response
   } catch (error) {
