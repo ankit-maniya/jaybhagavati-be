@@ -84,10 +84,33 @@
 
   <% for(var i=0; i < allInvoiceData.length; i++) { %>
     <% 
-      var color = '#';
-      for (var col = 0; col < 6; col++) {
-          color += (Math.random()*16|0).toString(16);
+      // var color = '#';
+      // for (var col = 0; col < 6; col++) {
+      //     color += (Math.random()*16|0).toString(16);
+      // }
+
+    const names = {
+      aqua: "#00ffff",
+      azure: "#f0ffff",
+      beige: "#f5f5dc",
+      black: "#000000",
+      blue: "#0000ff",
+      brown: "#a52a2a",
+      cyan: "#00ffff",
+      lightblue: "#add8e6",
+      lightcyan: "#e0ffff",
+      lightgreen: "#90ee90",
+      lightgrey: "#d3d3d3",
+      lightpink: "#ffb6c1",
+      lightyellow: "#ffffe0",
+    };  
+
+    var count = 0;
+    for (var prop in names) {
+      if (Math.random() < 1/++count) {
+        color = prop;
       }
+    }
     %>
       <tr class="tableData">
         <% if(i%2 ===0) { %>
