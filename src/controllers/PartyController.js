@@ -1513,7 +1513,7 @@ const generateAllInvoicePDF = async (req, res, next) => {
               // "orientation": "portrait",
               'header': {
                 'height': '45px',
-                'contents': `<div style='text-align: center;margin-top:18px;'>${user}${date}</div>`
+                'contents': `<div style='text-align: center;margin-top:18px;font-size: 30px'>${user}${date}</div>`
               },
               paginationOffset: 1,
               'footer': {
