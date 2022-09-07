@@ -6,8 +6,11 @@ import User from "./User"
 import { me } from "../functions/auth"
 import CuttingType from "./CuttingType"
 import Balance from "./Balance"
+import { CronController } from "../cron"
+import { PartyController } from "../controllers/PartyController"
 const route = express.Router()
 
+route.get("/cron", CronController.getLoats)
 route.get("/", (req, res, next) => {
   res.send("Jaybhagavati Api called!!!")
 })

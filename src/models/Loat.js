@@ -32,6 +32,9 @@ const LoatSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    partyName:  { 
+      type: String,
+    },
     multiWithDiamonds:  { 
       type: Boolean,
       default: false
