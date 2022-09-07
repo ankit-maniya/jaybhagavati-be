@@ -11,7 +11,7 @@ const PartySchema = new mongoose.Schema(
     billingName: {
       type: String,
       required: true,
-      unique:true,
+      unique:false,
     },
     openingBalance: {
       type: Number,
