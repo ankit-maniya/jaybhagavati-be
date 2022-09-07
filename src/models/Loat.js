@@ -13,6 +13,9 @@ const LoatSchema = new mongoose.Schema(
       required: true,
       ref:'User',
     },
+    // cutId: {
+    //   type: ObjectId,
+    // },
     typeId: {
       type: ObjectId,
     },
@@ -39,6 +42,12 @@ const LoatSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    month: { 
+      type: Number,
+    },
+    year: { 
+      type: Number,
+    },
     isActive: {
         type: Boolean,
         default: 1,
@@ -53,7 +62,7 @@ const LoatSchema = new mongoose.Schema(
       type: Date,
     }
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 )
 
 LoatSchema.plugin(mongoosePaginate)

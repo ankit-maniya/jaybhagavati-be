@@ -55,7 +55,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["USER", "ADMIN"],
     },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 )
 
 UserSchema.pre("save", async function () {

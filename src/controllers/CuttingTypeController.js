@@ -22,8 +22,6 @@ const addCuttingType = async (req, res, next) => {
 
     const bodyData = req.body
 
-    console.log('bodyData', bodyData);
-
     const isValidate = await CuttingTypeSchema.checkAddCuttingTypeInputValidate(bodyData) // validate a key and value
 
     if (isValidate.statuscode != 1) {

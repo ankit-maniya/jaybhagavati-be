@@ -1,30 +1,42 @@
 import moment from "moment"
-import helper, { errorRes, successRes } from "../functions/helper"
+import helper, { errorRes, successMessage, successRes } from "../functions/helper"
 import { model } from "../models"
 import LoatSchema from "../validation/LoatSchema"
 
 const getLoat = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
-    const { page, limit } = req.query
+    const { page, limit, from, to } = req.query
     const { partyId } = req.params
-    let query = {
+
+    const query = {
       isDelete: false,
+      userId: _id,
+      entryDate: {
+        $gte: await helper.formatDate(new Date()),
+        $lte: await helper.formatDate(new Date())
+      }
     }
+
+    if (from && to) {
+      query.entryDate = {
+        $gte: await helper.formatDate(from),
+        $lte: await helper.formatDate(to)
+      }
+    }
+
     const options = {
       page: page || 1,
       limit: limit || 400000,
       populate: 'partyId',
-      sort: {createdAt : 1}
+      sort: { entryDate: 1 }
     }
 
     if (partyId) {
-      query['partyId'] = partyId
+      query.partyId = partyId
     }
 
-    query['userId'] = _id
-
-    let loat = await model.Loat.paginate(query, options)
+    const loat = await model.Loat.paginate(query, options)
 
     res.send(successRes(loat)) // get success response
   } catch (error) {
@@ -47,16 +59,24 @@ const addLoat = async (req, res, next) => {
 
     for (let i=0; i<totalLength; i++) {
       loats[i].userId = _id
+      // if (!loats[i].cutId) {
+      //   throw { message: 'Invalid cutId Passed'}
+      // }
       
       if (!loats[i].entryDate) {
         loats[i].entryDate = await helper.formatDate(new Date())
+        loats[i].month = await helper.getMonth(new Date())
+        loats[i].year = await helper.getYear(new Date())
         bodyData.push(loats[i])
       } else {
+        const date = loats[i].entryDate
         loats[i].entryDate = await helper.formatDate(loats[i].entryDate)
+        loats[i].month = await helper.getMonth(date) + 1
+        loats[i].year = await helper.getYear(date)
         bodyData.push(loats[i])
       }
     }
-    
+
     // const isValidate = await LoatSchema.checkAddLoatInputValidate(bodyData) // validate a key and value
 
     // if (isValidate.statuscode != 1) {
@@ -112,9 +132,35 @@ const updateLoat = async (req, res, next) => {
   }
 }
 
+const deleteMany = async (req, res, next) => {
+  try {
+
+    const { _id } = req.user // login user bodyData
+    let { deleteMany } = req.body
+
+    if(deleteMany && deleteMany.length === 0) {
+        throw { message: 'Invalid array Data passed'}
+    }
+  
+    await model.Loat.updateMany(
+      // update loat bodyData and get latest bodyData
+      { _id: { $in: deleteMany }, userId:_id },
+      {
+        $set: { isDelete: true },
+      },
+      { new: true }
+    )
+
+    res.send(successMessage("deleted successfully data")) // get success response
+  } catch (error) {
+    res.send(errorRes(error.message)) // get error response
+  }
+}
+
 
 export const LoatController = {
   getLoat,
   addLoat,
-  updateLoat
+  updateLoat,
+  deleteMany,
 }

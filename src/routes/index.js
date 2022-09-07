@@ -7,7 +7,8 @@ import { me } from "../functions/auth"
 import CuttingType from "./CuttingType"
 import Balance from "./Balance"
 import { CronController } from "../cron"
-import { PartyController } from "../controllers/PartyController"
+import Test from "./Comman/Test"
+
 const route = express.Router()
 
 route.get("/cron", CronController.getLoats)
@@ -17,6 +18,7 @@ route.get("/", (req, res, next) => {
 
 /** User */
 route.use("/user", User)
+route.use("/test", Test)
 route.use("/party", me, Party)
 route.use("/cuttingType", me, CuttingType)
 route.use("/Loat", me, Loat)

@@ -2,7 +2,8 @@ import express from "express"
 import bodyParser from "body-parser"
 import morgan from "morgan"
 import cors from "cors"
-import { config } from "../config"
+import path from "path"
+import { config } from "./configs/config"
 import route from "./routes"
 import { connectDB } from "./models"
 import User from "./models/User"
@@ -37,6 +38,6 @@ connectDB().then( async() => {
 })
 
 // server start
-app.listen(config.PORT, () => {
+app.listen(config.PORT, async () => {
   console.log(`Server Start at ${config.PORT_URL}`)
 })

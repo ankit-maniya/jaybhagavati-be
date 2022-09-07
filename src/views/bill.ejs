@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#parties {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#parties td, #parties th {
+  border: 1px solid #cccccc;
+  padding: 8px;
+}
+
+#parties > tr > th {
+    font-size: 18px;
+}
+
+#parties tr:nth-child(even){background-color: white;}
+
+#parties tr:hover {background-color: #ddd;}
+
+#parties th {
+  text-align: left;
+  background-color: #2196f3;
+  color: black;
+}
+.tableData > td {
+    font-size: 18px;
+    padding: 6px
+}
+.header > th {
+    font-size: 18px;
+}
+
+.lightBlue  {
+  background-color: #afe8ff;
+}
+
+.text-red  {
+  background-color: #ffff;
+  color: #f32121;
+  font-size: 18px !important;
+  text-align: center !important;
+  font-weight: bold;
+}
+
+.text-black {
+  color:black;
+  text-align: center;
+}
+
+.text-align-center {
+  text-align: center;
+}
+
+</style>
+</head>
+<body>
+
+<table id="parties">
+  
+  <tr class="footer breakafter text-align-center">
+    <% if (total) { %>
+      <td style="background-color: rgb(255, 0, 183); color: black; padding: 2px; font-size: 20px; font-weight: bold;"> Total Diamonds :: <%= total.totalDiamond %> </td>
+      <td style="background-color: rgb(128, 0, 255); color: black; padding: 2px; font-size: 20px; font-weight: bold;"> Total Weight :: <%= total.totalWeight %> </td>
+      <td style="background-color: rgb(255, 0, 38); color: black; padding: 2px; font-size: 20px; font-weight: bold;"> Total Amount :: <%= total.totalPrice %> </td>
+    <% } %>
+  </tr>
+
+  <tr class="header breakafter text-align-center">
+    <th>Index</th>
+    <th>Party Name</th>
+    <th>Type</th>
+    <th>Rate</th>
+    <th>Diamond (weight)</th>
+    <th>Payment Option</th>
+    <th>Amount</th>
+    <th>date</th>
+    <th>More  Description</th>
+  </tr>
+
+
+  <% for(var i=0; i < allInvoiceData.length; i++) { %>
+    <% 
+      // var color = '#';
+      // for (var col = 0; col < 6; col++) {
+      //     color += (Math.random()*16|0).toString(16);
+      // }
+
+    const names = {
+      lightblue: "#add8e6",
+      lightcyan: "#e0ffff",
+      lightgreen: "#90ee90",
+      lightgrey: "#d3d3d3",
+      lightpink: "#ffb6c1",
+      lightyellow: "#ffffe0",
+    };  
+
+    var count = 0;
+    for (var prop in names) {
+      if (Math.random() < 1/++count) {
+        color = prop;
+      }
+    }
+    %>
+      <tr class="tableData">
+        <% if(i%2 ===0) { %>
+
+          <td rowspan=<%= allInvoiceData[i].cuttingType.length + 1 %> style='text-align: center;'><%= i+1 %></td>
+          <td rowspan=<%= allInvoiceData[i].cuttingType.length + 1 %> style='text-align: center;'> <%= allInvoiceData[i].partyName %> </td>
+        <% } else { %>
+
+          <td rowspan=<%= allInvoiceData[i].cuttingType.length + 1 %> style="background-color: <%= color %>; color: black" class="text-align-center"> <%= i+1 %></td>
+          <td rowspan=<%= allInvoiceData[i].cuttingType.length + 1 %> style="background-color: <%= color %>; color: black" class="text-align-center"> <%= allInvoiceData[i].partyName %> </td>
+        <% } %>
+        <!-- Table row right side data start -->
+        <% for(var j=0; j < allInvoiceData[i].cuttingType.length; j++) {
+          
+          if(j == 0) {
+        %>
+            <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %> ><%= allInvoiceData[i].cuttingType[j].key %></td>
+            <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %> ><%= allInvoiceData[i].cuttingType[j].rate %></td>
+            <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %> ><%= allInvoiceData[i].cuttingType[j].Diamonds %> (<%= allInvoiceData[i].cuttingType[j].weight %>)</td>
+            <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %> ><%= allInvoiceData[i].cuttingType[j].payment %></td>
+            <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %> ><%= allInvoiceData[i].cuttingType[j].Amount %></td>
+            <td> </td>
+            <td> </td>
+        <% } %>
+
+        <tr class="tableData">
+          <% if(j !== 0) { %>
+                <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %>><%= allInvoiceData[i].cuttingType[j].key %></td>
+                <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %>><%= allInvoiceData[i].cuttingType[j].rate %></td>
+                <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %>><%= allInvoiceData[i].cuttingType[j].Diamonds %> (<%= allInvoiceData[i].cuttingType[j].weight %>)</td>
+                <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %>><%= allInvoiceData[i].cuttingType[j].payment %></td>
+                <td  <% if(i%2 !== 0) { %> class="text-black"  style="background-color: <%= color %>;" <% } else if(j == allInvoiceData[i].cuttingType.length - 1) { %> class='text-red' <% } else { %> class='text-align-center' <% } %>><%= allInvoiceData[i].cuttingType[j].Amount %></td>
+                <td> </td>
+                <td> </td>
+            <% } %>
+
+        </tr>
+    <% }
+  } %>
+ 
+</table>
+
+</body>
+</html>

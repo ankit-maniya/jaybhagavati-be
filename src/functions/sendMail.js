@@ -1,5 +1,5 @@
 import helper from "./helper"
-import { config } from '../../config'
+import { config } from '../configs/config'
 import nodemailer from 'nodemailer'
 
 let transport = nodemailer.createTransport({
