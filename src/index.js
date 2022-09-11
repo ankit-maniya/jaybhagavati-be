@@ -29,6 +29,7 @@ app.use("/", route)
 // connect db
 connectDB().then( async() => {
   console.log("Mongoose connected")
+  console.log("Postgres connected")
   
   const foundUser = await User.findOne({ email: config.ADMIN_USER.email})
   

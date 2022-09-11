@@ -1,4 +1,5 @@
 
+import { Pool } from 'pg'
 import mongoose from "mongoose"
 import firebaseAdmin from "firebase-admin"
 import { config } from "../configs/config"
@@ -11,9 +12,11 @@ import Loat from "./Loat"
 import Bill from "./Bill"
 import Balance from "./Balance"
 
-
-
 const connectDB = async () => {
+  // Define Globally Connection
+  global.pgConnect = new Pool();
+  pgConnect.connect();
+
   return await mongoose.connect(config.MONGO_URL, {
     useNewUrlParser: true,
     useFindAndModify: false,
