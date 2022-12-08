@@ -14,8 +14,8 @@ import Balance from "./Balance"
 
 const connectDB = async () => {
   // Define Globally Connection
-  global.pgConnect = new Pool();
-  pgConnect.connect();
+  // global.pgConnect = new Pool();
+  // pgConnect.connect();
 
   return await mongoose.connect(config.MONGO_URL, {
     useNewUrlParser: true,
