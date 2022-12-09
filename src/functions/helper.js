@@ -382,9 +382,9 @@ const updloadFileToFirebase = async (filename) => {
             if (err) throw err
         })
 
-        console.log(`${config.FIREBASE_IMAGE_URL}${filename.split('/').pop()}?alt=media`);
+        console.log(`${config.FIREBASE_IMAGE_URL}${filename.split("\\").pop()}?alt=media`);
 
-        return `${config.FIREBASE_IMAGE_URL}${filename.split('/').pop()}?alt=media`
+        return `${config.FIREBASE_IMAGE_URL}${filename.split('\\').pop()}?alt=media`
     } catch(err) {
         console.log('err', err);
         throw err 
