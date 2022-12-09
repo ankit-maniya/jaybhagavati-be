@@ -1497,7 +1497,7 @@ const generateAllInvoicePDF = async (req, res, next) => {
       totalPrice
     }
 
-    console.log('allInvoiceData :: ', allInvoiceData);
+    // console.log('allInvoiceData :: ', allInvoiceData);
 
     const fileName = `All-Invoices${date}.pdf`
     const viewFilePath = path.join(__dirname, '../views/bill.ejs')
@@ -1507,10 +1507,10 @@ const generateAllInvoicePDF = async (req, res, next) => {
               res.send(err);
         } else {
           let options = {
-              'height': '20.25in',
-              'width': '18.5in',
+              // 'height': '20.25in',
+              // 'width': '18.5in',
               // "format": "Letter",
-              // "orientation": "portrait",
+              "orientation": "portrait",
               'header': {
                 'height': '45px',
                 'contents': `<div style='text-align: center;margin-top:8px;margin-bottom:8px;font-size: 30px; font-variant: all-petite-caps;'>${user}${date}</div>`
