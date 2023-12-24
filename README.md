@@ -1,5 +1,4 @@
 # jaybhagavati-be
-# jaybhagavati-be
 
 For Exporting database from offline database
 mongodump -d database_name -o directory_to_store_dumps
