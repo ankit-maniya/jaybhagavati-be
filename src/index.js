@@ -27,18 +27,20 @@ app.get("/file/:imgname", (req, res, next) => {
 app.use("/", route)
 
 // connect db
-connectDB().then( async() => {
+connectDB().then(async () => {
   console.log("Mongoose connected")
   // console.log("Postgres connected")
-  
-  const foundUser = await User.findOne({ email: config.ADMIN_USER.email})
-  
+
+  const foundUser = await User.findOne({ email: config.ADMIN_USER.email })
+
   if (!foundUser) {
     await User.create(config.ADMIN_USER)
   }
+
+  // server start
+  app.listen(config.PORT, async () => {
+    console.log(`Server Start at ${config.PORT_URL}`)
+  })
 })
 
-// server start
-app.listen(config.PORT, async () => {
-  console.log(`Server Start at ${config.PORT_URL}`)
-})
+
