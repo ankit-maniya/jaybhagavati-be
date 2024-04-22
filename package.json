@@ -7,8 +7,14 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "Diamonds",
+    "Packet Details",
+    "Diamonds Weight Details",
+    "Diamonds Price Details",
+    "Bill Generation"
+  ],
+  "author": "Ankit Maniya",
   "engines": {
     "node": ">=14.0.0"
   },
