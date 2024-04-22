@@ -1,20 +1,16 @@
 import express from "express"
-import bodyParser from "body-parser"
 import morgan from "morgan"
 import cors from "cors"
-import path from "path"
-import { config } from "./configs/config"
-import route from "./routes"
-import { connectDB } from "./models"
-import User from "./models/User"
+import { config } from "./src/configs/config"
+import route from "./src/routes"
+import { connectDB } from "./src/models"
+import User from "./src/models/User"
 const app = express()
 
 // middleware
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-// app.use(bodyParser.json())
-// app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 
 // get uploaded files
@@ -32,6 +28,7 @@ connectDB().then(async () => {
   // console.log("Postgres connected")
 
   const foundUser = await User.findOne({ email: config.ADMIN_USER.email })
+  // const firebaseServiceAccount = await FirebaseModel.findOne({ type: "service_account" });
 
   if (!foundUser) {
     await User.create(config.ADMIN_USER)

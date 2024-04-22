@@ -2,10 +2,9 @@
   "name": "jaybhagavati-be",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
   "scripts": {
-    "start": "node -r esm src/index.js",
-    "dev": "nodemon -e js,ejs -r esm src/index.js"
+    "start": "node -r esm app.js",
+    "dev": "nodemon -e js,ejs -r esm app.js"
   },
   "keywords": [],
   "author": "",

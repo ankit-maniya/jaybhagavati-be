@@ -11,6 +11,7 @@ import CuttingType from "./CuttingType"
 import Loat from "./Loat"
 import Bill from "./Bill"
 import Balance from "./Balance"
+import FirebaseModel from './FirebaseSettings'
 
 const connectDB = async () => {
   // Define Globally Connection
@@ -23,16 +24,33 @@ const connectDB = async () => {
     useCreateIndex: true,
     useUnifiedTopology: true
   })
+  
 }
 
 // firebase connect for image store
 const initializeFirebase = async () => {
 
+  const firebaseServiceAccount = await FirebaseModel.findOne({ type: "service_account" });
+  console.log("called :: firebase", firebaseServiceAccount);
+
+  let firebaseConfigs = {};
+  let firebase_storage_bucket = config.FIREBASE_STORAGE_BUCKET;
+  // const findFirebaseSettings = await 
+  if(firebaseServiceAccount) {
+    Object.keys(firebaseServiceAccount).map((key) => {
+      if(!["firebaseImageUrl", "storageBucket"].includes(key)){
+        firebaseConfigs[key] = firebaseServiceAccount[key];
+      }
+    });
+
+    firebase_storage_bucket = firebaseServiceAccount.storageBucket;
+  }
+
   // check if firebase already initialize or not
-  if (firebaseAdmin.apps.length === 0) {
+  if (firebaseAdmin.apps.length === 0 && firebaseConfigs) {
     firebaseAdmin.initializeApp({
-      credential: firebaseAdmin.credential.cert(serviceAccount),
-      storageBucket: config.FIREBASE_STORAGE_BUCKET
+      credential: firebaseAdmin.credential.cert(firebaseConfigs),
+      storageBucket: firebase_storage_bucket
     });
   }
 
@@ -48,5 +66,6 @@ export const model = {
   Loat,
   Bill,
   Balance,
-  UserActivity
+  UserActivity,
+  FirebaseModel
 }
