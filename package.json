@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js --watch swaggerCommonDoc.yaml"
   },
   "keywords": [
     "Diamonds",
@@ -36,8 +36,11 @@
     "nodemailer": "^6.9.13",
     "pg": "^8.11.5",
     "pify": "^6.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.1",
-    "validator": "^13.11.0"
+    "validator": "^13.11.0",
+    "yaml": "^2.4.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

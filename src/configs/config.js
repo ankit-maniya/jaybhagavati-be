@@ -1,3 +1,6 @@
+import fs from 'fs';
+import YAML from 'yaml';
+
 import dotenv from "dotenv"
 dotenv.config()
 const {
@@ -37,6 +40,38 @@ const ADMIN_USER = {
   ],
 }
 
+const swaggerCommonPath = new URL('../../swaggerCommonDoc.yaml', import.meta.url).pathname
+const swaggerCommonYaml = fs.readFileSync(swaggerCommonPath, 'utf8');
+const swaggerCommon = YAML.parse(swaggerCommonYaml);
+
+const SWAGGER_OPTIONS = {
+  failOnErrors: true,
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: "Jaybhagavati Diamond API",
+      version: "0.1.0",
+      description:
+        "This App is documented with Swagger",
+      license: {
+        name: "MIT",
+        url: "https://spdx.org/licenses/MIT.html",
+      },
+      contact: {
+        name: "Ankit Maniya",
+        email: "ankit.maniya6588@gmail.com",
+      },
+    },
+    servers: [
+      {
+        url: PORT_URL,
+      },
+    ],
+    ...swaggerCommon,  // Merge with common definition
+  },
+  apis: ['./src/routes/*.js'],
+};
+
 export const config = {
   PORT,
   HOST,
@@ -56,5 +91,6 @@ export const config = {
   FIREBASE_APIKEY,
   FIREBASE_AUTH_DOMAIN,
   FIREBASE_STORAGE_BUCKET,
-  FIREBASE_IMAGE_URL
+  FIREBASE_IMAGE_URL,
+  SWAGGER_OPTIONS
 }
