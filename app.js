@@ -1,5 +1,9 @@
 import express from "express"
 import cors from "cors"
+
+import swaggerUi from 'swagger-ui-express';
+import swaggerJSDoc from 'swagger-jsdoc';
+
 import { config } from "./src/configs/config.js"
 import route from "./src/routes/index.js"
 import { connectDB } from "./src/models/index.js"
@@ -10,6 +14,10 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
+
+// swagger documentation
+const swaggerSpec = swaggerJSDoc(config.SWAGGER_OPTIONS);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // get uploaded files
 app.get("/file/:imgname", (req, res, next) => {
