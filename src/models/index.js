@@ -3,7 +3,6 @@ import { Pool } from 'pg'
 import mongoose from "mongoose"
 import firebaseAdmin from "firebase-admin"
 import { config } from "../configs/config"
-import serviceAccount from "../configs/firebaseServiceAccountKey.json"
 import User from "./User"
 import UserActivity from "./UserActivity"
 import Party from "./Party"
