@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-const mongoosePaginate = require('mongoose-paginate-v2')
+import mongoosePaginate  from 'mongoose-paginate-v2'
 
 const ObjectId = mongoose.Schema.Types.ObjectId
 const LoatSchema = new mongoose.Schema(

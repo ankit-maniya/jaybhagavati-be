@@ -1,5 +1,4 @@
 import mongoose from "mongoose"
-import { isEmail } from "validator"
 import bcrypt from "bcrypt"
 
 const ObjectId = mongoose.Schema.Types.ObjectId
@@ -20,7 +19,6 @@ const UserSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      validate: [isEmail, "Please Enter Valid Email!"],
       unique: true,
       required: true,
     },

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { model } from "../models";
+import { model } from "../models/index.js";
 
 const MigrateLoatTable = async (req, res, next) => {
   console.log("== Migrate Loat Type Table ==");

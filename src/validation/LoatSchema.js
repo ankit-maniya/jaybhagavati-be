@@ -1,4 +1,4 @@
-import { errorRes, successMessage } from "../functions/helper"
+import { errorRes, successMessage } from "../functions/helper.js"
 
 const checkAddLoatInputValidate = (req) => {
   return new Promise(async (resolve, reject) => {

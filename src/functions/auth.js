@@ -1,8 +1,9 @@
-import { config } from "../configs/config"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
-import { model } from "../models"
-import { errorRes } from "./helper"
+
+import { config } from "../configs/config.js"
+import { model } from "../models/index.js"
+import { errorRes } from "./helper.js"
 
 export const me = async (req, res, next) => {
   try {

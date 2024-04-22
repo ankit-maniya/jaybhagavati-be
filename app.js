@@ -1,14 +1,12 @@
 import express from "express"
-import morgan from "morgan"
 import cors from "cors"
-import { config } from "./src/configs/config"
-import route from "./src/routes"
-import { connectDB } from "./src/models"
-import User from "./src/models/User"
+import { config } from "./src/configs/config.js"
+import route from "./src/routes/index.js"
+import { connectDB } from "./src/models/index.js"
+import User from "./src/models/User.js"
 const app = express()
 
 // middleware
-app.use(morgan("dev"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())

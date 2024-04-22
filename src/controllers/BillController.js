@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
-import { errorRes, successRes } from "../functions/helper"
-import { model } from "../models"
+import { errorRes, successRes } from "../functions/helper.js"
+import { model } from "../models/index.js"
 const ObjectId = mongoose.Types.ObjectId
 
 const getBill = async (req, res, next) => {

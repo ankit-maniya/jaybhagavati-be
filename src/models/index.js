@@ -1,28 +1,23 @@
 
-import { Pool } from 'pg'
+// import { Pool } from 'pg'
 import mongoose from "mongoose"
 import firebaseAdmin from "firebase-admin"
-import { config } from "../configs/config"
-import User from "./User"
-import UserActivity from "./UserActivity"
-import Party from "./Party"
-import CuttingType from "./CuttingType"
-import Loat from "./Loat"
-import Bill from "./Bill"
-import Balance from "./Balance"
-import FirebaseModel from './FirebaseSettings'
+import { config } from "../configs/config.js"
+import User from "./User.js"
+import UserActivity from "./UserActivity.js"
+import Party from "./Party.js"
+import CuttingType from "./CuttingType.js"
+import Loat from "./Loat.js"
+import Bill from "./Bill.js"
+import Balance from "./Balance.js"
+import FirebaseModel from './FirebaseSettings.js'
 
 const connectDB = async () => {
   // Define Globally Connection
   // global.pgConnect = new Pool();
   // pgConnect.connect();
 
-  return await mongoose.connect(config.MONGO_URL, {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-    useUnifiedTopology: true
-  })
+  return await mongoose.connect(config.MONGO_URL)
   
 }
 

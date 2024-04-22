@@ -1,4 +1,4 @@
-import { errorRes, successMessage } from "../functions/helper"
+import { errorRes, successMessage } from "../functions/helper.js"
 
 const checkAddBalanceInputValidate = (req) => {
   return new Promise(async (resolve, reject) => {

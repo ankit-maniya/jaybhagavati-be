@@ -1,5 +1,5 @@
 import express from "express"
-import { BalanceController } from "../controllers/BalanceController"
+import { BalanceController } from "../controllers/BalanceController.js"
 
 const Balance = express.Router()
 

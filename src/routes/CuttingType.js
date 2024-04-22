@@ -1,5 +1,5 @@
 import express from "express"
-import { CuttingTypeController } from "../controllers/CuttingTypeController"
+import { CuttingTypeController } from "../controllers/CuttingTypeController.js"
 
 const CuttingType = express.Router()
 

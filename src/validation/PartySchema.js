@@ -1,6 +1,5 @@
-import { isEmail } from "validator"
-import { model } from "../models"
-import { errorRes, successMessage } from "../functions/helper"
+import { model } from "../models/index.js"
+import { errorRes, successMessage } from "../functions/helper.js"
 
 const checkAddPartyInputValidate = (req) => {
   return new Promise(async (resolve, reject) => {
@@ -137,12 +136,7 @@ const checkUpdatePartyInputValidate = (req, LoginId) => {
     // optional emailid
     if (Array.isArray(keys) && keys.includes("email") && req.email == "") {
       resolve(errorRes("Please Enter Email"))
-    } else {
-      if (keys.includes("email") && !isEmail(req.email)) {
-        resolve(errorRes("Please Enter Proper Email"))
-      }
     }
-
     // // isActive
     // if (
     //   Array.isArray(keys) &&

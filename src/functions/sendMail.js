@@ -1,6 +1,7 @@
-import helper from "./helper"
-import { config } from '../configs/config'
 import nodemailer from 'nodemailer'
+
+import helper from "./helper.js"
+import { config } from '../configs/config.js'
 
 let transport = nodemailer.createTransport({
     host: 'smtp.mailtrap.io',

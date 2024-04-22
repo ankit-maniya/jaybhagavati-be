@@ -1,10 +1,10 @@
-import { uploadFileToStorage } from "../functions/uploadfile"
-import helper, { errorRes, successRes } from "../functions/helper"
-import { model } from "../models"
-import Userschema from "../validation/UserSchema"
-import { createToken } from "../functions/auth"
-import { validatePassword } from "../models/User"
-import forgotPasswordByMail from "../functions/sendMail"
+import { uploadFileToStorage } from "../functions/uploadfile.js"
+import helper, { errorRes, successRes } from "../functions/helper.js"
+import { model } from "../models/index.js"
+import Userschema from "../validation/UserSchema.js"
+import { createToken } from "../functions/auth.js"
+import { validatePassword } from "../models/User.js"
+import forgotPasswordByMail from "../functions/sendMail.js"
 
 const login = async (req, res, next) => {
   try {

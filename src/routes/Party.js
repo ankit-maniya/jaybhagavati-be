@@ -1,5 +1,5 @@
 import express from "express"
-import { PartyController } from "../controllers/PartyController"
+import { PartyController } from "../controllers/PartyController.js"
 
 const Party = express.Router()
 

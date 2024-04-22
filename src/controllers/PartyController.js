@@ -5,10 +5,10 @@ import pdf from 'html-pdf'
 import path from 'path'
 import _ from 'lodash'
 
-import { uploadFileToStorage } from '../functions/uploadfile'
-import helper, { errorRes, successRes } from '../functions/helper'
-import { model } from '../models'
-import Partyschema from '../validation/PartySchema'
+import { uploadFileToStorage } from '../functions/uploadfile.js'
+import helper, { errorRes, successRes } from '../functions/helper.js'
+import { model } from '../models/index.js'
+import Partyschema from '../validation/PartySchema.js'
 
 const ObjectId = mongoose.Types.ObjectId
 

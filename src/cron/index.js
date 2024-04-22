@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 
-import { model } from "../models";
+import { model } from "../models/index.js";
 
-import { PartyController } from "../controllers/PartyController";
+import { PartyController } from "../controllers/PartyController.js";
 
-import { errorRes, successRes } from "../functions/helper";
+import { errorRes, successRes } from "../functions/helper.js";
 
 const getLoats = async (req, res, next) => {
   try {

@@ -1,6 +1,6 @@
-import { errorRes, successRes } from "../functions/helper"
-import { model } from "../models"
-import CuttingTypeSchema from "../validation/CuttingTypeSchema"
+import { errorRes, successRes } from "../functions/helper.js"
+import { model } from "../models/index.js"
+import CuttingTypeSchema from "../validation/CuttingTypeSchema.js"
 
 const getCuttingType = async (req, res, next) => {
   try {

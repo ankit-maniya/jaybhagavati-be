@@ -1,5 +1,5 @@
 import express from "express"
-import { LoatController } from "../controllers/LoatController"
+import { LoatController } from "../controllers/LoatController.js"
 
 const Loat = express.Router()
 

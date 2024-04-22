@@ -2,8 +2,9 @@ import fs from "fs"
 import moment from "moment"
 import path from "path"
 import { v4 as uuid } from "uuid"
-import { config } from "../configs/config"
-import { initializeFirebase } from "../models"
+
+import { config } from "../configs/config.js"
+import { initializeFirebase } from "../models/index.js"
 
 
 const errorRes = (message,status = 0) => {

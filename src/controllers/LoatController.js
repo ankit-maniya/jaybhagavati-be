@@ -1,7 +1,7 @@
 import moment from "moment"
-import helper, { errorRes, successMessage, successRes } from "../functions/helper"
-import { model } from "../models"
-import LoatSchema from "../validation/LoatSchema"
+import helper, { errorRes, successMessage, successRes } from "../functions/helper.js"
+import { model } from "../models/index.js"
+import LoatSchema from "../validation/LoatSchema.js"
 
 const getLoat = async (req, res, next) => {
   try {

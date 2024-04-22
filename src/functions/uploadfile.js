@@ -1,7 +1,8 @@
 import multer from "multer"
 import path from "path"
 import pify from "pify"
-import { config } from "../configs/config"
+
+import { config } from "../configs/config.js"
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

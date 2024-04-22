@@ -1,5 +1,4 @@
 import mongoose from "mongoose"
-import { isEmail } from "validator"
 
 const ObjectId = mongoose.Schema.Types.ObjectId
 const PartySchema = new mongoose.Schema(

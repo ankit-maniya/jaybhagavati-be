@@ -1,6 +1,5 @@
-import { isEmail } from "validator"
-import { model } from "../models"
-import { errorRes, successMessage } from "../functions/helper"
+import { model } from "../models/index.js"
+import { errorRes, successMessage } from "../functions/helper.js"
 
 const checkSignupInputValidate = (req) => {
   return new Promise(async (resolve, reject) => {
@@ -111,9 +110,7 @@ const checkEmailInputValidate = async (email) => {
     if (!email) {
       resolve(errorRes("Please Enter Email"))
     } else {
-      if (!isEmail(email)) {
-        resolve(errorRes("Please Enter Proper Email"))
-      } else if (email != "") {
+      if (email != "") {
         const found = await model.User.findOne({ email:email })
         if (!found) {
           resolve(errorRes("Email is Not Register! Use Diffrent Email!"))
