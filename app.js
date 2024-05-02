@@ -1,5 +1,7 @@
 import express from "express"
 import cors from "cors"
+import expressWinston from 'express-winston';
+import winston from 'winston';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
@@ -25,8 +27,35 @@ app.get("/file/:imgname", (req, res, next) => {
   return fs.readFileSync(path + "/" + req.params.imgname)
 })
 
+if (config.DEVELOPMENT) {
+  app.use(expressWinston.logger({
+    transports: [
+      new winston.transports.Console()
+    ],
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.json()
+    )
+  }));
+}
+
+
 // route
 app.use("/", route)
+
+if (config.DEVELOPMENT) {
+
+  // express-winston errorLogger makes sense AFTER the router.
+  app.use(expressWinston.errorLogger({
+    transports: [
+      new winston.transports.Console()
+    ],
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.json()
+    )
+  }));
+}
 
 // connect db
 connectDB().then(async () => {

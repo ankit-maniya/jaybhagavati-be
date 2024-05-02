@@ -16,18 +16,6 @@ const getParty = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
 
-    // const query = {
-    //   isDelete : false,
-    //   userId: _id,
-    //   // cuttingType: {
-    //   //   '$elemMatch': {
-    //   //     isDelete: false
-    //   //   }
-    //   // }
-    // }
-
-    // let party = await model.Party.find(query).sort({ 'createdAt':1})
-
     let party = await model.Party.aggregate([
       {
           $match :{
@@ -339,7 +327,7 @@ const getPartyLoatDateWise = async (req, res, next) => {
           {
               $match :{
                   $and:  [
-                      { partyId: ObjectId(partyId)},
+                      { partyId: new ObjectId(partyId)},
                       { userId: _id },
                       { isDelete: false },
                       {
@@ -389,7 +377,7 @@ const getPartyLoatDateWise = async (req, res, next) => {
         {
             $match :{
                 $and:  [
-                    { _id: ObjectId(partyId)},
+                    { _id: new ObjectId(partyId)},
                     { userId: _id },
                 ]
             }
@@ -706,7 +694,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
         {
             $match :{
                 $and:  [
-                    { partyId: ObjectId(partyId)},
+                    { partyId: new ObjectId(partyId)},
                     { userId: _id },
                     { isDelete : false },
                     {
@@ -781,7 +769,7 @@ const getPartyLoatYearWise = async (req, res, next) => {
         {
             $match :{
                 $and:  [
-                    { _id: ObjectId(partyId)},
+                    { _id: new ObjectId(partyId)},
                     { userId: _id },
                 ]
             }
@@ -1138,7 +1126,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
               for (let date=0; date<totalLoatLength; date++) {
 
                 const partyId = dateWiseLoats[date]._id.party
-                let partyQuery = [ { userId: req.user._id }, { _id: ObjectId(partyId)} ]
+                let partyQuery = [ { userId: req.user._id }, { _id: new ObjectId(partyId)} ]
                 const getParty = await model.Party.aggregate([
                   {
                       $match :{

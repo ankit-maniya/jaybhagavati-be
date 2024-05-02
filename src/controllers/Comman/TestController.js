@@ -8,7 +8,7 @@ import { model } from "../../models/index.js"
 const ObjectId = mongoose.Types.ObjectId
 
 const updateFunction = async (req, res, next) => {
-  const userId = ObjectId("607b2629aca5b54a80cf4706")
+  const userId = new ObjectId("607b2629aca5b54a80cf4706")
 
   try {
 

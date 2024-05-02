@@ -15,6 +15,9 @@ export const me = async (req, res, next) => {
     }
     next()
   } catch (error) {
+
+    console.log("error", error);
+
     res.send(errorRes(error.message,2))
   }
 }
@@ -33,7 +36,8 @@ export const createToken = async (data, expire) => {
 
 export const verifyAuthTocken = async (xtoken) => {
     const token = await jwt.verify(xtoken, config.JWT_SECRET)
-    const id = mongoose.Types.ObjectId(token._id)
+
+    const id = new mongoose.Types.ObjectId(token._id)
     let udata = ""
     if (token) {
       udata = await model.User.findOne({
