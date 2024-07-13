@@ -15,7 +15,7 @@ const getBill = async (req, res, next) => {
     let loats = await model.Loat.aggregate(
       [
         {
-            $match:{ $and: [{ userId: _id }, { partyId: ObjectId(partyId) }, { isDelete: false }] }
+            $match:{ $and: [{ userId: _id }, { partyId: new ObjectId(partyId) }, { isDelete: false }] }
         },
         {
             $unwind: '$partyId'
@@ -46,7 +46,7 @@ const getBill = async (req, res, next) => {
         }
     ])
 
-    let partyDetail = await model.Party.findOne({ _id: ObjectId(partyId) })
+    let partyDetail = await model.Party.findOne({ _id: new ObjectId(partyId) })
     let paymentVariables = {
       TotalPayment: 0
     }

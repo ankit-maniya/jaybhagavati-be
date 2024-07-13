@@ -15,9 +15,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
+app.set('views');
+
 // swagger documentation
-const swaggerSpec = swaggerJSDoc(config.SWAGGER_OPTIONS);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// const swaggerSpec = swaggerJSDoc(config.SWAGGER_OPTIONS);
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // get uploaded files
 app.get("/file/:imgname", (req, res, next) => {

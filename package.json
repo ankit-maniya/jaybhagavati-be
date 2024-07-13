@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js --watch swaggerCommonDoc.yaml"
+    "dev": "nodemon app.js",
+    "dev_with_swagger": "nodemon app.js --watch swaggerCommonDoc.yaml"
   },
   "keywords": [
     "Diamonds",

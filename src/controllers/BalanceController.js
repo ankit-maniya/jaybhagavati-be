@@ -38,7 +38,7 @@ const getBalancePartyWise = async (req, res, next) => {
       {
         $match :{ 
           $and:  [
-              { partyId: ObjectId(partyId)},
+              { partyId: new ObjectId(partyId)},
               { userId: _id },
               { isDelete : false },
             ] 

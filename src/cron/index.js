@@ -23,7 +23,7 @@ const getLoats = async (req, res, next) => {
     };
 
     const newUser = {
-      _id: ObjectId("6316ec141a45abc2fd36cf10"),
+      _id: new ObjectId("6316ec141a45abc2fd36cf10"),
       partyId: "6316ec141a45abc2fd36cf10",
       isActive: true,
       isDelete: false,
@@ -36,7 +36,7 @@ const getLoats = async (req, res, next) => {
       __v: { $numberInt: "0" },
     };
 
-    // const cuttingTypes = await model.CuttingType.find({"userId": ObjectId(oldUser._id), isDelete: false})
+    // const cuttingTypes = await model.CuttingType.find({"userId": new ObjectId(oldUser._id), isDelete: false})
 
     // const changeUserID = [];
     // partys.forEach((party, index) => {
@@ -78,7 +78,7 @@ const getLoats = async (req, res, next) => {
     const changeUserID = [];
 
     const loats = await model.Loat.find({
-      userId: ObjectId(oldUser._id),
+      userId: new ObjectId(oldUser._id),
       year: 2022,
       isDelete: false,
       month: 8,
