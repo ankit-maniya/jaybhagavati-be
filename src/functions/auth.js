@@ -15,6 +15,9 @@ export const me = async (req, res, next) => {
     }
     next()
   } catch (error) {
+
+    console.log("error", error);
+
     res.send(errorRes(error.message,2))
   }
 }

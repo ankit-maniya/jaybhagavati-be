@@ -18,18 +18,6 @@ const getParty = async (req, res, next) => {
   try {
     const { _id } = req.user // login user bodyData
 
-    // const query = {
-    //   isDelete : false,
-    //   userId: _id,
-    //   // cuttingType: {
-    //   //   '$elemMatch': {
-    //   //     isDelete: false
-    //   //   }
-    //   // }
-    // }
-
-    // let party = await model.Party.find(query).sort({ 'createdAt':1})
-
     let party = await model.Party.aggregate([
       {
         $match: {
@@ -389,12 +377,34 @@ const getPartyLoatDateWise = async (req, res, next) => {
     ])
 
     let party = await model.Party.aggregate([
-      {
-        $match: {
-          $and: [
-            { _id: new ObjectId(partyId) },
-            { userId: _id },
-          ]
+        {
+            $match :{
+                $and:  [
+                    { _id: new ObjectId(partyId)},
+                    { userId: _id },
+                ]
+            }
+        },
+        {
+            $project: {
+                _id:1,
+                isActive : 1,
+                isDelete : 1,
+                mobile : 1,
+                name : 1,
+                billingName : 1,
+                userId:1,
+                balanceSheet: 1,
+                createdAt:1,
+                updatedAt: 1,
+                cuttingType : {
+                  $filter: {
+                  input: '$cuttingType',
+                  as: 'item',
+                  cond: {$eq: ['$$item.isDelete', false]}
+                }
+              }
+            }
         }
       },
       {
