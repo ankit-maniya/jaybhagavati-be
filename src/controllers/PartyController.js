@@ -1364,7 +1364,7 @@ const getAllPartyLoatYearWise = async (req, res, next) => {
                   ) {
                     const insertDate = typeWiseLoat[typeLoat]._id.date;
                     let loatMonth = moment(insertDate).month() + 1;
-                    if (config.TESTING_FROM_CANADA) {
+                    if (config.DEVELOPMENT) {
                       loatMonth = moment(insertDate).month() + 2;
                     }
 

@@ -1,8 +1,8 @@
-import fs from 'fs';
-import YAML from 'yaml';
+import fs from "fs";
+import YAML from "yaml";
 
-import dotenv from "dotenv"
-dotenv.config()
+import dotenv from "dotenv";
+dotenv.config();
 const {
   PORT,
   HOST,
@@ -23,8 +23,8 @@ const {
   FIREBASE_AUTH_DOMAIN,
   FIREBASE_STORAGE_BUCKET,
   FIREBASE_IMAGE_URL,
-  TESTING_FROM_CANADA
-} = process.env
+  DEVELOPMENT,
+} = process.env;
 
 const ADMIN_USER = {
   isActive: true,
@@ -38,9 +38,9 @@ const ADMIN_USER = {
     {
       latitude: "72.00525",
       longitude: "21.2025464",
-    }
+    },
   ],
-}
+};
 
 // const swaggerCommonPath = new URL('../../swaggerCommonDoc.yaml', import.meta.url).pathname
 // const swaggerCommonYaml = fs.readFileSync(swaggerCommonPath, 'utf8');
@@ -94,7 +94,7 @@ export const config = {
   FIREBASE_PROJECT_ID,
   FIREBASE_AUTH_DOMAIN,
   FIREBASE_STORAGE_BUCKET,
-  TESTING_FROM_CANADA,
+  DEVELOPMENT,
   FIREBASE_IMAGE_URL,
   // SWAGGER_OPTIONS
-}
+};
