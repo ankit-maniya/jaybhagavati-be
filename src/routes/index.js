@@ -10,11 +10,26 @@ import { CronController } from "../cron/index.js"
 import { MigrationController } from "../cron/migrationToSql.js"
 import Test from "./Comman/Test.js"
 
+import ejs from 'ejs';
+import path from 'path';
+const myDir = path.resolve();
+
 const route = express.Router()
 
 route.get("/cron", MigrationController.MigrateLoatTable)
 route.get("/", (req, res, next) => {
-  res.send("Jaybhagavati Api called!!!")
+  // const newdir = path.dirname(myDir + '../views/bill.ejs');
+  // console.log(newdir);
+
+  ejs.renderFile(path.join(myDir, "views", 'test.ejs'), { name: "Test" }, (err, data) => {
+    if (err) {
+      console.log(err);
+      res.send(err);
+    } else {
+      return res.send(data);
+    }
+  });
+  // res.send("Jaybhagavati Api called!!!")
 })
 
 /** User */
