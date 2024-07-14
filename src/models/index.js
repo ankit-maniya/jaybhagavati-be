@@ -18,27 +18,28 @@ const connectDB = async () => {
   // pgConnect.connect();
 
   return await mongoose.connect(config.MONGO_URL)
-  
+
 }
 
 // firebase connect for image store
 const initializeFirebase = async () => {
 
   const firebaseServiceAccount = await FirebaseModel.findOne({ type: "service_account" });
-  console.log("called :: firebase", firebaseServiceAccount);
 
   let firebaseConfigs = {};
   let firebase_storage_bucket = config.FIREBASE_STORAGE_BUCKET;
-  // const findFirebaseSettings = await 
-  if(firebaseServiceAccount) {
-    Object.keys(firebaseServiceAccount).map((key) => {
-      if(!["firebaseImageUrl", "storageBucket"].includes(key)){
-        firebaseConfigs[key] = firebaseServiceAccount[key];
+  // Convert Mongoose document to plain JavaScript object
+  const serviceAccountObject = firebaseServiceAccount.toObject();
+  if (serviceAccountObject) {
+    Object.keys(serviceAccountObject).map((key) => {
+      if (!["firebaseImageUrl", "storageBucket"].includes(key)) {
+        firebaseConfigs[key] = serviceAccountObject[key];
       }
     });
 
-    firebase_storage_bucket = firebaseServiceAccount.storageBucket;
+    firebase_storage_bucket = serviceAccountObject.storageBucket;
   }
+
 
   // check if firebase already initialize or not
   if (firebaseAdmin.apps.length === 0 && firebaseConfigs) {

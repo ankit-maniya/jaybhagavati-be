@@ -36,7 +36,7 @@ const getLoats = async (req, res, next) => {
       __v: { $numberInt: "0" },
     };
 
-    // const cuttingTypes = await model.CuttingType.find({"userId": ObjectId(oldUser._id), isDelete: false})
+    // const cuttingTypes = await model.CuttingType.find({"userId": new ObjectId(oldUser._id), isDelete: false})
 
     // const changeUserID = [];
     // partys.forEach((party, index) => {

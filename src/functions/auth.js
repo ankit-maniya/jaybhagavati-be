@@ -36,7 +36,6 @@ export const createToken = async (data, expire) => {
 
 export const verifyAuthTocken = async (xtoken) => {
     const token = await jwt.verify(xtoken, config.JWT_SECRET)
-
     const id = new mongoose.Types.ObjectId(token._id)
     let udata = ""
     if (token) {
